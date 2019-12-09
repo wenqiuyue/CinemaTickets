@@ -8,12 +8,6 @@
         <div class="logo">后台管理系统</div>
         <div class="header-right">
             <div class="header-user-con">
-                <!-- 全屏显示 -->
-                <div class="btn-fullscreen" @click="handleFullScreen">
-                    <el-tooltip effect="dark" :content="fullscreen?`取消全屏`:`全屏`" placement="bottom">
-                        <i class="el-icon-rank"></i>
-                    </el-tooltip>
-                </div>
                 <!-- 消息中心 -->
                 <div class="btn-bell">
                     <el-tooltip
@@ -29,18 +23,16 @@
                 </div>
                 <!-- 用户头像 -->
                 <div class="user-avator">
-                    <img src="../../assets/img/img.jpg" />
+                    <img :src="userInfoLocal.upicture?userInfoLocal.upicture:initSrc" />
+                    <!-- <img src="../../assets/img/img.jpg" /> -->
                 </div>
                 <!-- 用户名下拉菜单 -->
                 <el-dropdown class="user-name" trigger="click" @command="handleCommand">
                     <span class="el-dropdown-link">
-                        {{username}}
+                        {{userInfoLocal.username}}
                         <i class="el-icon-caret-bottom"></i>
                     </span>
                     <el-dropdown-menu slot="dropdown">
-                        <a href="https://github.com/lin-xin/vue-manage-system" target="_blank">
-                            <el-dropdown-item>项目仓库</el-dropdown-item>
-                        </a>
                         <el-dropdown-item divided command="loginout">退出登录</el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
@@ -50,26 +42,32 @@
 </template>
 <script>
 import bus from '../common/bus';
+import { parse } from 'path';
 export default {
     data() {
         return {
             collapse: false,
             fullscreen: false,
-            name: 'linxin',
-            message: 2
+            userInfoLocal: null,
+            message: 2,
+            initSrc:require("../../assets/img/img.jpg")  //头像的默认图片
         };
     },
     computed: {
-        username() {
-            let username = localStorage.getItem('ms_username');
-            return username ? username : this.name;
+    },
+    created(){
+        let userinfo = localStorage.getItem('USER_INFO');
+        if(userinfo){
+            userinfo = JSON.parse(userinfo)
+            this.userInfoLocal = userinfo;
         }
+        console.log(this.userInfoLocal)
     },
     methods: {
         // 用户名下拉菜单选择事件
         handleCommand(command) {
             if (command == 'loginout') {
-                localStorage.removeItem('ms_username');
+                localStorage.removeItem('USER_INFO');
                 this.$router.push('/login');
             }
         },
@@ -78,33 +76,6 @@ export default {
             this.collapse = !this.collapse;
             bus.$emit('collapse', this.collapse);
         },
-        // 全屏事件
-        handleFullScreen() {
-            let element = document.documentElement;
-            if (this.fullscreen) {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitCancelFullScreen) {
-                    document.webkitCancelFullScreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
-            } else {
-                if (element.requestFullscreen) {
-                    element.requestFullscreen();
-                } else if (element.webkitRequestFullScreen) {
-                    element.webkitRequestFullScreen();
-                } else if (element.mozRequestFullScreen) {
-                    element.mozRequestFullScreen();
-                } else if (element.msRequestFullscreen) {
-                    // IE11
-                    element.msRequestFullscreen();
-                }
-            }
-            this.fullscreen = !this.fullscreen;
-        }
     },
     mounted() {
         if (document.body.clientWidth < 1500) {

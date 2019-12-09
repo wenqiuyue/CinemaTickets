@@ -41,24 +41,34 @@ export default {
             },
         };
     },
+    created(){
+        let userLocal=localStorage.getItem('USER_INFO');
+        if(userLocal){
+            this.$router.push({path:'/'});
+        }
+    },
     methods: {
         submitForm() {
             this.$refs.login.validate(valid => {
                 if (valid) {
                     login(this.param).then((res) => {
                          console.log(res)
-                        if(res.code === 0){
+                        if(res.code === 0){          
+                            this.$delete(res.body,'password');
+                            localStorage.setItem('USER_INFO', JSON.stringify(res.body));
                             //如果当用户类型为0时，走后台管理员界面，等于1时，走会员界面
                             if(res.body.utype === 0){
                                 this.$message.success('登录成功');
                                 this.$router.push({path:'/'});
+                            }else if(res.body.utype === 1){
+                                return;
                             }
-                        }                    
-                        
+                        }else if(res.code === 1000){
+                            this.$message.warning(res.message);
+                        }                                           
                     })
                 } else {
                     this.$message.error('请输入账号和密码');
-                    console.log('error submit!!');
                     return false;
                 }
             });
