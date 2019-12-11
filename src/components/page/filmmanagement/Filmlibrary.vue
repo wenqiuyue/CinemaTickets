@@ -11,12 +11,6 @@
             <div class="handle-box">
                 <el-button
                     type="primary"
-                    icon="el-icon-delete"
-                    class="handle-del mr10"
-                    @click="delAllSelection"
-                >批量删除</el-button>
-                <el-button
-                    type="success"
                     icon="el-icon-document-add"
                     class="handle-del mr10"
                     @click="AddFilm"
@@ -25,6 +19,7 @@
                 <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
             </div>
             <el-table
+                v-loading="loading"
                 :data="tableData"
                 border
                 class="table"
@@ -32,21 +27,24 @@
                 header-cell-class-name="table-header"
                 @selection-change="handleSelectionChange"
             >
-                <el-table-column type="selection" width="55" align="center"></el-table-column>
-                <el-table-column prop="mid" label="ID" width="55" align="center"></el-table-column>
-                <el-table-column label="影片图片" align="center">
+                <el-table-column label="序号" width="55" align="center">
                     <template slot-scope="scope">
-                        <el-image
-                            class="table-td-thumb"
-                            :src="scope.row.thumb"
-                            :preview-src-list="[scope.row.thumb]"
-                        ></el-image>
+                        {{ scope.$index+1 }}
+                    </template>
+                </el-table-column>
+                <el-table-column label="影片图片" align="center" width="100">
+                    <template slot-scope="scope">
+                        <el-image class="table-td-thumb" :src="scope.row.mpicture"></el-image>
                     </template>
                 </el-table-column>
                 <el-table-column prop="mname" label="影片名" align="center"></el-table-column>
                 <el-table-column prop="mtype" label="影片类型" align="center"></el-table-column>
                 <el-table-column prop="mcountry" label="拍摄国家" align="center"></el-table-column>
-                <el-table-column prop="releasetime" label="上映时间" align="center"></el-table-column>
+                <el-table-column prop="releasetime" label="上映时间" align="center">
+                    <template slot-scope="scope">
+                        {{ scope.row.releasetime | dateFormat }}
+                    </template>
+                </el-table-column>
                 <el-table-column prop="mduration" label="影片时长" align="center"></el-table-column>
                 <el-table-column prop="mintroduction" label="影片简介" align="center"></el-table-column>
                 <el-table-column label="操作" width="180" align="center">
@@ -71,7 +69,8 @@
                     layout="total, prev, pager, next"
                     :current-page="query.pageIndex"
                     :page-size="query.pageSize"
-                    :total="pageTotal"
+                    :total="filmTotal"
+                    :pager-count="11"
                     @current-change="handlePageChange"
                 ></el-pagination>
             </div>
@@ -79,10 +78,10 @@
 
         <!-- 编辑弹出框 -->
         <el-dialog :title="isAdd?'添加影片':'编辑影片'" :visible.sync="editVisible" width="40%">
-            <el-form  :model="form" label-width="80px" :rules="rules" ref="formRules">
-                <el-form-item label="影片图片" prop="mpicture">
+            <el-form :model="form" label-width="80px" :rules="rules" ref="formRules">
+                <el-form-item label="影片图片" prop="mpictureform">
                     <div class="crop-demo">
-                        <img :src="form.mpicture" class="pre-img" />
+                        <img :src="form.mpictureform" class="pre-img" />
                         <div class="crop-demo-btn">
                             选择图片
                             <input
@@ -95,33 +94,43 @@
                         </div>
                     </div>
                 </el-form-item>
-                <el-form-item label="影片名" prop="mname">
-                    <el-input v-model="form.mname"></el-input>
+                <el-form-item label="影片名" prop="mnameform">
+                    <el-input v-model="form.mnameform"></el-input>
                 </el-form-item>
-                <el-form-item label="影片类型" prop="mtype">
-                    <el-input v-model="form.mtype"></el-input>
+                <el-form-item label="影片类型" prop="mtypeform">
+                    <el-input v-model="form.mtypeform"></el-input>
                 </el-form-item>
-                <el-form-item label="拍摄国家" prop="mcountry">
-                    <el-input v-model="form.mcountry"></el-input>
+                <el-form-item label="拍摄国家" prop="mcountryform">
+                    <el-input v-model="form.mcountryform"></el-input>
                 </el-form-item>
-                <el-form-item label="上映时间" prop="releasetime">
-                    <el-input v-model="form.releasetime"></el-input>
+                <el-form-item label="上映时间" prop="releasetimeform">
+                    <div class="block">
+                        <el-date-picker
+                            v-model="form.releasetimeform"
+                            type="datetime"
+                            placeholder="选择日期时间"
+                        ></el-date-picker>
+                    </div>
+                    <!-- <el-input v-model="form.releasetime"></el-input> -->
                 </el-form-item>
-                <el-form-item label="影片时长" prop="mduration">
-                    <el-input v-model="form.mduration"></el-input>
+                <el-form-item label="影片时长" prop="mdurationform">
+                    <el-input v-model="form.mdurationform"></el-input>
                 </el-form-item>
-                <el-form-item label="影片简介" prop="mintroduction">
-                    <el-input type="textarea" v-model="form.mintroduction"></el-input>
+                <el-form-item label="影片简介" prop="mintroductionform">
+                    <el-input type="textarea" v-model="form.mintroductionform"></el-input>
                 </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
                 <el-button @click="editVisible = false">取 消</el-button>
-                <el-button type="primary" @click="saveEdit('formRules')">确 定</el-button>
+                <el-button
+                    type="primary"
+                    @click="isAdd?addFilms('formRules'):saveEdit('formRules')"
+                >确 定</el-button>
             </span>
-            <el-dialog title="裁剪图片" :visible.sync="dialogVisible" width="40%" style>
+            <el-dialog title="裁剪图片" :visible.sync="dialogVisible" width="30%">
                 <vue-cropper
                     ref="cropper"
-                    :src="imgSrc"
+                    :src="cropImg"
                     :ready="cropImage"
                     :zoom="cropImage"
                     :cropmove="cropImage"
@@ -137,44 +146,47 @@
 </template>
 
 <script>
-import { fetchData } from '../../../api/index';
+import { getMoviePagination, addFilm, getAllMovie,getAllMovieCount,updateMovieById,delMovieByid } from '../../../api/index';
 import VueCropper from 'vue-cropperjs';
 export default {
     name: 'filmlibrary',
     data() {
         return {
             query: {
-                pageIndex: 1,
-                pageSize: 10
+                pageIndex: 1,  //当前页数
+                pageSize: 5  //每页显示条目个数
             },
             isAdd: false, //是否点击添加按钮
-            defaultSrc: require('../../../assets/img/addPic.png'),
-            imgSrc: '',
-            dialogVisible: false,
-
+            // imageUrl: '',
             tableData: [],
-            multipleSelection: [],
+            multipleSelection: [],   //多选
             delList: [],
-            editVisible: false,
-            pageTotal: 0,
+            editVisible: false, //添加、编辑弹窗是否显示
+            filmTotal: null,   //影片库数量
+            defaultSrc: require('../../../assets/img/addPic.png'),
+            cropImg: '',  //剪裁的图片
+            dialogVisible: false,  //剪裁
+            loading:false,  //加载
             form: {
-                mpicture: '', //添加图片的展示图片
-                mname: null, //影片名
-                mtype: null, //影片类型
-                mcountry: null, //拍摄国家
-                releasetime: null, //上映时间
-                mduration: null, //影片时长
-                mintroduction: null //影片简介
+                midform:null, //影片id
+                mpictureform: '', //添加图片的展示图片
+                mnameform: null, //影片名
+                mtypeform: null, //影片类型
+                mcountryform: null, //拍摄国家
+                releasetimeform: null, //上映时间
+                mdurationform: null, //影片时长
+                mintroductionform: null //影片简介
             },
-            idx: -1,
+            idx: -1,   //影片库第几行
             id: -1,
             rules: {
-                mname: [{ required: true, message: '请输入影片名', trigger: 'blur' }],
-                mtype: [{ required: true, message: '请输入影片类型', trigger: 'blur' }],
-                mcountry: [{ required: true, message: '请输入拍摄国家', trigger: 'blur' }],
-                releasetime: [{ required: true, message: '请输入上映时间', trigger: 'blur' }],
-                mduration: [{ required: true, message: '请输入影片时长', trigger: 'blur' }],
-                mintroduction: [{ required: true, message: '请输入影片简介', trigger: 'blur' }]
+                mpictureform: [{ required: true, message: '请上传影片图片', trigger: 'blur' }],
+                mnameform: [{ required: true, message: '请输入影片名', trigger: 'blur' }],
+                mtypeform: [{ required: true, message: '请输入影片类型', trigger: 'blur' }],
+                mcountryform: [{ required: true, message: '请输入拍摄国家', trigger: 'blur' }],
+                releasetimeform: [{ required: true, message: '请输入上映时间', trigger: 'blur' }],
+                mdurationform: [{ required: true, message: '请输入影片时长', trigger: 'blur' }],
+                mintroductionform: [{ required: true, message: '请输入影片简介', trigger: 'blur' }]
             }
         };
     },
@@ -182,43 +194,29 @@ export default {
         VueCropper
     },
     created() {
+        this.getFilmCount();
         this.getData();
-        this.form.mpicture = this.defaultSrc;
+        this.form.mpictureform = this.defaultSrc;
     },
     methods: {
-        //添加影片
-        AddFilm() {
-            this.isAdd = true;
-            this.form.mpicture = this.defaultSrc;
-            this.editVisible = true;
+        //获取影片库数量
+        getFilmCount() {
+            getAllMovieCount().then(res => {
+                this.filmTotal = res;
+            })
         },
-        setImage(e) {
-            const file = e.target.files[0];
-            if (!file.type.includes('image/')) {
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = event => {
-                this.dialogVisible = true;
-                this.imgSrc = event.target.result;
-                this.$refs.cropper && this.$refs.cropper.replace(event.target.result);
-            };
-            reader.readAsDataURL(file);
-        },
-        cropImage() {
-            this.form.mpicture = this.$refs.cropper.getCroppedCanvas().toDataURL();
-        },
-        cancelCrop() {
-            this.dialogVisible = false;
-            this.form.mpicture = this.defaultSrc;
-        },
-        // 获取 easy-mock 的模拟数据
+        // 获取影片库数据
         getData() {
-            fetchData(this.query).then(res => {
-                console.log(res);
-                this.tableData = res.list;
-                this.pageTotal = res.pageTotal || 50;
-            });
+            let data={
+                pageIndex: this.query.pageSize*(this.query.pageIndex-1),
+                pageSize: this.query.pageSize  
+            }
+            getMoviePagination(data).then(res => {
+                if (res.code === 0) {
+                    this.tableData = res.body;
+                    this.loading = false;
+                }
+            })
         },
         // 触发搜索按钮
         handleSearch() {
@@ -232,8 +230,14 @@ export default {
                 type: 'warning'
             })
                 .then(() => {
-                    this.$message.success('删除成功');
-                    this.tableData.splice(index, 1);
+                    delMovieByid({mid:row.mid}).then(res => {
+                        if(res === true){
+                            this.$message.success('删除成功');
+                            // this.tableData.splice(index, 1);
+                            this.filmTotal--;
+                            this.getData();                       
+                        }
+                    })                   
                 })
                 .catch(() => {});
         },
@@ -241,40 +245,111 @@ export default {
         handleSelectionChange(val) {
             this.multipleSelection = val;
         },
-        delAllSelection() {
-            const length = this.multipleSelection.length;
-            let str = '';
-            this.delList = this.delList.concat(this.multipleSelection);
-            for (let i = 0; i < length; i++) {
-                str += this.multipleSelection[i].name + ' ';
-            }
-            this.$message.error(`删除了${str}`);
-            this.multipleSelection = [];
-        },
         // 编辑操作
         handleEdit(index, row) {
+            console.log(row);
+            this.form.mpictureform = row.mpicture;
+            this.form.mnameform = row.mname;
+            this.form.mcountryform = row.mcountry;
+            this.form.mtypeform = row.mtype;
+            this.form.mdurationform = row.mduration;
+            this.form.mintroductionform = row.mintroduction;
+            this.form.releasetimeform = row.releasetime;
+            this.form.midform = row.mid
             this.idx = index;
-            this.form = row;
             this.isAdd = false;
             this.editVisible = true;
         },
         // 保存编辑
         saveEdit(formName) {
-            this.$refs[formName].validate((vail) => {
-                if(vail){
-                    this.editVisible = false;
-                    this.$message.success(`修改第 ${this.idx + 1} 行成功`);
-                    this.$set(this.tableData, this.idx, this.form);
-                    console.log(this.form);
-                }else{
-                    return
+            this.$refs[formName].validate(vail => {
+                if (vail) {
+                    let data = {
+                        mpicture: this.form.mpictureform,
+                        mname: this.form.mnameform,
+                        mtype: this.form.mtypeform,
+                        mcountry: this.form.mcountryform,
+                        releasetime: this.form.releasetimeform,
+                        mduration: this.form.mdurationform,
+                        mintroduction: this.form.mintroductionform,
+                        mid: this.form.midform
+                    };
+                    updateMovieById(data).then(res => {
+                        if(res === true){
+                            this.$message.success(`修改第 ${this.idx + 1} 行成功`);
+                            this.$set(this.tableData, this.idx, data);
+                        }
+                        this.editVisible = false;      
+                    })                                     
+                } else {
+                    return;
                 }
-            })   
+            });
+        },
+        //点击添加影片按钮
+        AddFilm() {
+            //清空表单
+            this.form.mpictureform = this.defaultSrc;
+            this.form.mnameform = null;
+            this.form.mtypeform = null;
+            this.form.mcountryform = null;
+            this.form.releasetimeform = null;
+            this.form.mdurationform = null;
+            this.form.mintroductionform = null;
+            this.isAdd = true;
+            this.editVisible = true;
+        },
+        //添加影片
+        addFilms(formName) {
+            this.$refs[formName].validate(vail => {
+                if (vail) {
+                    let data = {
+                        mpicture: this.form.mpictureform,
+                        mname: this.form.mnameform,
+                        mtype: this.form.mtypeform,
+                        mcountry: this.form.mcountryform,
+                        releasetime: this.form.releasetimeform,
+                        mduration: this.form.mdurationform,
+                        mintroduction: this.form.mintroductionform
+                    };
+                    addFilm(data).then(res => {
+                        //当数据库插入数据成功时，界面刷新数据
+                        if(res === true){
+                            this.filmTotal++;
+                            this.getData();
+                        }
+                        this.editVisible = false;
+                    });
+                } else {
+                    return;
+                }
+            });
         },
         // 分页导航
         handlePageChange(val) {
+            this.loading = true;
             this.$set(this.query, 'pageIndex', val);
             this.getData();
+        },
+        setImage(e) {
+            const file = e.target.files[0];
+            if (!file.type.includes('image/')) {
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = event => {
+                this.dialogVisible = true;
+                this.cropImg = event.target.result;
+                this.$refs.cropper && this.$refs.cropper.replace(event.target.result);
+            };
+            reader.readAsDataURL(file);
+        },
+        cropImage() {
+            this.form.mpictureform = this.$refs.cropper.getCroppedCanvas().toDataURL();
+        },
+        cancelCrop() {
+            this.dialogVisible = false;
+            this.form.mpictureform = this.defaultSrc;
         }
     }
 };
@@ -306,8 +381,8 @@ export default {
 .table-td-thumb {
     display: block;
     margin: auto;
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
 }
 .pre-img {
     width: 100px;
@@ -316,12 +391,40 @@ export default {
     border: 1px solid #eee;
     border-radius: 5px;
 }
+.avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+.avatar-uploader .el-upload:hover {
+    border-color: #409eff;
+}
+.avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+}
+.avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
+}
+.crop-demo {
+    display: flex;
+    align-items: flex-end;
+}
 .crop-demo-btn {
     position: relative;
     width: 100px;
     height: 40px;
     line-height: 40px;
     padding: 0 20px;
+    margin-left: 30px;
     background-color: #409eff;
     color: #fff;
     font-size: 14px;

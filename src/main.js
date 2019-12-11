@@ -10,6 +10,12 @@ const routerPush = VueRouter.prototype.push
 VueRouter.prototype.push = function push(location) {
   return routerPush.call(this, location).catch(error=> error)
 }
+//导入格式化时间插件  首先 npm i moment -S 然后导入
+import moment from 'moment'
+//定义全局过滤器
+Vue.filter('dateFormat',function (dataStr,pattern="YYYY-MM-DD HH:mm") {
+    return moment(dataStr).format(pattern);
+})
 import ElementUI from 'element-ui';
 import VueI18n from 'vue-i18n';
 import { messages } from './components/common/i18n';

@@ -61,7 +61,7 @@ export default {
             userinfo = JSON.parse(userinfo)
             this.userInfoLocal = userinfo;
         }
-        console.log(this.userInfoLocal)
+        // console.log(this.userInfoLocal)
     },
     methods: {
         // 用户名下拉菜单选择事件
