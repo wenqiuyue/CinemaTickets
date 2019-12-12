@@ -46,7 +46,11 @@
                     </template>
                 </el-table-column>
                 <el-table-column prop="mduration" label="影片时长" align="center"></el-table-column>
-                <el-table-column prop="mintroduction" label="影片简介" align="center"></el-table-column>
+                <el-table-column prop="mintroduction" label="影片简介" align="center">
+                    <template slot-scope="scope">
+                        <div class="mintroduction">{{ scope.row.mintroduction}}</div>
+                    </template>
+                </el-table-column>
                 <el-table-column label="操作" width="180" align="center">
                     <template slot-scope="scope">
                         <el-button
@@ -146,7 +150,7 @@
 </template>
 
 <script>
-import { getMoviePagination, addFilm, getAllMovie,getAllMovieCount,updateMovieById,delMovieByid } from '../../../api/index';
+import { getMoviePagination, addFilm, getAllMovie,getAllMovieCount,updateMovieById,delMovieByid,getMovieByName,getMovieByNameCount } from '../../../api/index';
 import VueCropper from 'vue-cropperjs';
 export default {
     name: 'filmlibrary',
@@ -154,7 +158,8 @@ export default {
         return {
             query: {
                 pageIndex: 1,  //当前页数
-                pageSize: 5  //每页显示条目个数
+                pageSize: 5,  //每页显示条目个数
+                name: null  //搜索的影片名字
             },
             isAdd: false, //是否点击添加按钮
             // imageUrl: '',
@@ -167,6 +172,7 @@ export default {
             cropImg: '',  //剪裁的图片
             dialogVisible: false,  //剪裁
             loading:false,  //加载
+            isSearch: false,  //是否点击搜索按钮
             form: {
                 midform:null, //影片id
                 mpictureform: '', //添加图片的展示图片
@@ -192,6 +198,19 @@ export default {
     },
     components: {
         VueCropper
+    },
+    computed:{
+        //监听搜索框的影片名是否发生改变
+        watchSearchName(){ return this.query.name}
+    },
+    watch:{
+        watchSearchName(_new, _old){
+            if(this.isSearch === true){
+                this.isSearch = false
+                this.getFilmCount();
+                this.getData();
+            }          
+        }
     },
     created() {
         this.getFilmCount();
@@ -220,8 +239,23 @@ export default {
         },
         // 触发搜索按钮
         handleSearch() {
-            this.$set(this.query, 'pageIndex', 1);
-            this.getData();
+            this.isSearch = true
+            let data={
+                pageIndex: this.query.pageSize*(this.query.pageIndex-1),
+                pageSize: this.query.pageSize,
+                name: this.query.name  
+            }
+            Promise.all([
+                //获取搜索影片的数量
+                getMovieByNameCount({name:this.query.name}),
+                getMovieByName(data)
+            ]).then(results => {
+                this.filmTotal = results[0]
+                if(results[1].code === 0){
+                    this.tableData = results[1].body;
+                    this.loading = false;
+                }
+            })
         },
         // 删除操作
         handleDelete(index, row) {
@@ -329,7 +363,11 @@ export default {
         handlePageChange(val) {
             this.loading = true;
             this.$set(this.query, 'pageIndex', val);
-            this.getData();
+            if(this.isSearch === true){
+                this.handleSearch()
+            }else{
+                this.getData();
+            }          
         },
         setImage(e) {
             const file = e.target.files[0];
@@ -439,5 +477,15 @@ export default {
     top: 0;
     opacity: 0;
     cursor: pointer;
+}
+.mintroduction{
+    display: -webkit-box;
+    overflow: hidden; /*超出宽度部分隐藏*/
+    text-overflow: ellipsis; /*超出部分以点号代替*/
+    -webkit-line-clamp: 3; /*行数*/
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1rem;
+    font-size: 13px;
 }
 </style>

@@ -60,4 +60,20 @@ export function delMovieByid(data){
     method: 'get',
     params:data
   })
+};
+//根据电影名字影片库模糊查询
+export function getMovieByName(data){
+  return request({
+    url: '/manager/getMovieByName',
+    method: 'post',
+    data
+  })
+};
+//根据电影名字影片库模糊查询的数据个数
+export function getMovieByNameCount(data){
+  return request({
+    url: '/manager/getMovieByNameCount',
+    method: 'get',
+    params:data
+  })
 }
