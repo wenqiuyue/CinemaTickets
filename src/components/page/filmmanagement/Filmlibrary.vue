@@ -45,9 +45,12 @@
                     </template>
                 </el-table-column>
                 <el-table-column prop="mduration" label="影片时长" align="center"></el-table-column>
-                <el-table-column prop="mintroduction" label="影片简介" align="center">
+                <el-table-column prop="mintroduction" label="影片简介" align="center">        
                     <template slot-scope="scope">
-                        <div class="mintroduction">{{ scope.row.mintroduction}}</div>
+                        <el-tooltip  effect="dark"  placement="left-start">
+                            <div slot="content" class="item">{{scope.row.mintroduction}}</div>               
+                            <div class="mintroduction">{{ scope.row.mintroduction}}</div>
+                        </el-tooltip>
                     </template>
                 </el-table-column>
                  <el-table-column label="是否上架" align="center" width="80">
@@ -85,7 +88,7 @@
         </div>
 
         <!-- 编辑弹出框 -->
-        <el-dialog :title="isAdd?'添加影片':'编辑影片'" :visible.sync="editVisible" width="40%">
+        <el-dialog :title="isAdd?'添加影片':'编辑影片'" :visible.sync="editVisible" width="35%">
             <el-form :model="form" label-width="80px" :rules="rules" ref="formRules">
                 <el-form-item label="影片图片" prop="mpictureform">
                     <div class="crop-demo">
@@ -122,7 +125,9 @@
                     <!-- <el-input v-model="form.releasetime"></el-input> -->
                 </el-form-item>
                 <el-form-item label="影片时长" prop="mdurationform">
-                    <el-input v-model="form.mdurationform"></el-input>
+                    <el-input v-model="form.mdurationform" >
+                        <template slot="append">分钟</template>
+                    </el-input>
                 </el-form-item>
                 <el-form-item label="影片简介" prop="mintroductionform">
                     <el-input type="textarea" v-model="form.mintroductionform"></el-input>
@@ -165,7 +170,7 @@ export default {
                 pageSize: 5,  //每页显示条目个数
                 name: null  //搜索的影片名字
             },
-            isAdd: false, //是否点击添加按钮
+            isAdd: true, //是否点击添加按钮
             // imageUrl: '',
             tableData: [],
             multipleSelection: [],   //多选
@@ -276,7 +281,9 @@ export default {
             getMoviePagination(data).then(res => {
                 if (res.code === 0) {
                     this.tableData = res.body;
-                    this.getAllRecent(this.tableData)
+                    if(this.isAdd === true){
+                        this.getAllRecent(this.tableData)
+                    }                 
                     this.loading = false;
                 }
             })
@@ -434,7 +441,10 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+.el-tooltip__popper{
+    width: 100px;
+}
 .handle-box {
     margin-bottom: 20px;
 }
@@ -529,4 +539,10 @@ export default {
     line-height: 1rem;
     font-size: 13px;
 }
+
+.item {
+    width: 400px;
+    text-align: center;
+}
+
 </style>

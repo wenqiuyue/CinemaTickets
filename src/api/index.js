@@ -99,5 +99,6 @@ export function getAllRecentFilms(){
     url: '/manager/getAllRecentFilms',
     method: 'get'
   })
-}
+};
+
 

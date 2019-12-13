@@ -77,6 +77,21 @@ export default {
                     ]
                 },
                 {
+                    icon: 'el-icon-lx-record',
+                    index: '2',
+                    title: '放映厅管理',
+                    subs: [
+                        {
+                            index: 'projectionhallmanager',
+                            title: '放映厅管理'
+                        },
+                        {
+                            index: 'scenearrange',
+                            title: '场次安排'
+                        },
+                    ]
+                },
+                {
                     icon: 'el-icon-lx-copy',
                     index: 'table',
                     title: '基础表格'

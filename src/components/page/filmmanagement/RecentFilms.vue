@@ -9,15 +9,21 @@
         </div>
         <div class="container">
             <el-row>
-                <el-col :span="5" v-for="(o, index) in recentFilmsData" :offset="1" style="margin: 15px;">
+                <el-col :span="5" v-for="(o, index) in recentFilmsData" :key="index" :offset="1" style="margin: 15px;">
                     <el-card :body-style="{ padding: '8px' }">
                     <img :src="o.mpicture" class="image">
                     <div style="padding: 14px;">
                         <span>{{o.mname}}</span>
                         <div class="bottom clearfix">
-                        <time class="time">上映时间{{ o.releasetime | dateFormat }}</time>
-                        <el-button type="text" class="button">操作按钮</el-button>
+                            <time class="time">{{ o.mtype }}</time>
                         </div>
+                        <div class="bottom clearfix">
+                            <time class="time">{{ o.mcountry }} / {{ o.mduration }}分钟</time>
+                        </div>
+                        <div class="bottom clearfix">
+                            <time class="time">{{ o.releasetime | dateFormat }}大陆上映</time>
+                        </div>
+                        <el-button type="text" class="button" @click="delRecent(o.mid,index)">下架此电影</el-button>
                     </div>
                     </el-card>
                 </el-col>
@@ -27,7 +33,7 @@
 </template>
 
 <script>
-import { getAllRecentFilms } from '../../../api/index';
+import { getAllRecentFilms,delRecentFilmsById } from '../../../api/index';
 export default {
     name: 'recentfilms',
     data() {
@@ -37,10 +43,13 @@ export default {
         };
     },
     created() {
+        // this.getData();
+    },
+    mounted(){
         this.getData();
     },
     methods: {
-        // 获取 easy-mock 的模拟数据
+        // 获取近期数据
         getData() {
             getAllRecentFilms().then(res => {
                 if(res.code === 0){         
@@ -48,7 +57,18 @@ export default {
                     console.log(this.recentFilmsData)
                 }
             });
-        },     
+        },
+        //下架近期电影
+        delRecent(mid,index){
+            delRecentFilmsById({mid:mid}).then(res => {
+                if(res === true){
+                    this.$message.success("下架成功");
+                    this.recentFilmsData.splice(index,1);
+                }else{
+                    this.$message.success("下架失败");
+                }
+            })
+        }     
     }
 };
 </script>
@@ -67,11 +87,13 @@ export default {
   .button {
     padding: 0;
     float: right;
+    margin: 10px 0;
   }
 
   .image {
     width: 100%;
     display: block;
+    height: 200px;
   }
 
   .clearfix:before,
