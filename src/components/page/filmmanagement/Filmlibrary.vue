@@ -25,7 +25,6 @@
                 class="table"
                 ref="multipleTable"
                 header-cell-class-name="table-header"
-                @selection-change="handleSelectionChange"
             >
                 <el-table-column label="序号" width="55" align="center">
                     <template slot-scope="scope">
@@ -51,7 +50,12 @@
                         <div class="mintroduction">{{ scope.row.mintroduction}}</div>
                     </template>
                 </el-table-column>
-                <el-table-column label="操作" width="180" align="center">
+                 <el-table-column label="是否上架" align="center" width="80">
+                    <template slot-scope="scope">
+                        <el-switch v-model="scope.row.isRecent" @change="recentChange(scope.$index, scope.row)"></el-switch>
+                    </template>
+                </el-table-column>
+                <el-table-column label="操作" width="120" align="center">
                     <template slot-scope="scope">
                         <el-button
                             type="text"
@@ -150,7 +154,7 @@
 </template>
 
 <script>
-import { getMoviePagination, addFilm, getAllMovie,getAllMovieCount,updateMovieById,delMovieByid,getMovieByName,getMovieByNameCount } from '../../../api/index';
+import { getMoviePagination, addFilm, getAllMovie,getAllMovieCount,updateMovieById,delMovieByid,getMovieByName,getMovieByNameCount,addRecentFilms,delRecentFilmsById, getAllRecentFilms } from '../../../api/index';
 import VueCropper from 'vue-cropperjs';
 export default {
     name: 'filmlibrary',
@@ -173,6 +177,7 @@ export default {
             dialogVisible: false,  //剪裁
             loading:false,  //加载
             isSearch: false,  //是否点击搜索按钮
+            isRecent: false,
             form: {
                 midform:null, //影片id
                 mpictureform: '', //添加图片的展示图片
@@ -218,6 +223,44 @@ export default {
         this.form.mpictureform = this.defaultSrc;
     },
     methods: {
+        //影片是否上架
+        recentChange(index, row) {
+            //影片上架
+            if(row.isRecent){
+                addRecentFilms({mid:row.mid}).then(res => {
+                    if(res === true){
+                        this.$message.success("上架成功");
+                    }else{
+                        this.$message.success("上架失败");
+                        row.isRecent =false;
+                    }
+                })
+            }else{  //影片下架
+                delRecentFilmsById({mid:row.mid}).then(res => {
+                     if(res === true){
+                        this.$message.success("下架成功");
+                    }else{
+                        this.$message.success("下架失败");
+                        row.isRecent =false;
+                    }
+                })
+            }
+        },
+        //获取上架影片,初始化影片是否上架
+        getAllRecent(tableData) {
+            //给tableData添加isRecent属性
+            for(let item of tableData){
+                this.$set(item,'isRecent',false);
+            }
+            getAllRecentFilms().then(data => {
+                for(let resitem of data.body){
+                    for(let item of tableData){
+                        if(resitem.mid === item.mid)
+                            item.isRecent = true
+                    }
+                }
+            })
+        },
         //获取影片库数量
         getFilmCount() {
             getAllMovieCount().then(res => {
@@ -233,6 +276,7 @@ export default {
             getMoviePagination(data).then(res => {
                 if (res.code === 0) {
                     this.tableData = res.body;
+                    this.getAllRecent(this.tableData)
                     this.loading = false;
                 }
             })
@@ -253,6 +297,7 @@ export default {
                 this.filmTotal = results[0]
                 if(results[1].code === 0){
                     this.tableData = results[1].body;
+                    this.getAllRecent(this.tableData)
                     this.loading = false;
                 }
             })
@@ -274,10 +319,6 @@ export default {
                     })                   
                 })
                 .catch(() => {});
-        },
-        // 多选操作
-        handleSelectionChange(val) {
-            this.multipleSelection = val;
         },
         // 编辑操作
         handleEdit(index, row) {

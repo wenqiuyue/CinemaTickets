@@ -103,12 +103,17 @@ export default new Router({
                     component: () => import(/* webpackChunkName: "donate" */ '../components/page/Donate.vue'),
                     meta: { title: '支持作者' }
                 },
-                // 影片库
                 {
                     path: '/filmlibrary',
                     component: () => import ('../components/page/filmmanagement/Filmlibrary.vue'),
                     meta: {title: '影片库'}
-                }
+                },
+                {
+                    path: '/recentfilms',
+                    component: () => import ('../components/page/filmmanagement/RecentFilms.vue'),
+                    meta: {title: '近期影片'}
+                },
+
             ]
         },
         {

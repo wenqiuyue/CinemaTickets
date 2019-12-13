@@ -76,4 +76,28 @@ export function getMovieByNameCount(data){
     method: 'get',
     params:data
   })
+};
+//添加近期影片
+export function addRecentFilms(data){
+  return request({
+    url: '/manager/addRecentFilms',
+    method: 'get',
+    params:data
+  })
+};
+//根据影片id删除近期影片
+export function delRecentFilmsById(data){
+  return request({
+    url: '/manager/delRecentFilmsById',
+    method: 'get',
+    params:data
+  })
+};
+//获取近期影片
+export function getAllRecentFilms(){
+  return request({
+    url: '/manager/getAllRecentFilms',
+    method: 'get'
+  })
 }
+

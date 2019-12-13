@@ -71,10 +71,15 @@ export default {
                             title: '影片库'
                         },
                         {
-                            index: 'markdown',
+                            index: 'recentfilms',
                             title: '近期影片'
                         },
                     ]
+                },
+                {
+                    icon: 'el-icon-lx-copy',
+                    index: 'table',
+                    title: '基础表格'
                 },
                 {
                     icon: 'el-icon-lx-copy',
