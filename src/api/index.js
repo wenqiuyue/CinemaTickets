@@ -100,5 +100,36 @@ export function getAllRecentFilms(){
     method: 'get'
   })
 };
+// 添加放映厅
+export function addProjectionHall(data){
+  return request({
+    url: '/manager/addProjectionHall',
+    method: 'post',
+    data
+  })
+};
+//获取所有放映厅
+export function getAllProjectionHall(){
+  return request({
+    url: '/manager/getAllProjectionHall',
+    method: 'get'
+  })
+};
+ //添加放映厅
+ export function updateProjectionHallById(data){
+   return request({
+    url: '/manager/updateProjectionHallById',
+    method: 'post',
+    data
+   })
+ };
+ //删除放映厅
+ export function delProjectionHallById(data){
+   return request({
+      url: '/manager/delProjectionHallById',
+      method: 'get',
+      params:data
+   })
+ }
 
 

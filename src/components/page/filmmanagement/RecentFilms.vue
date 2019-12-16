@@ -10,7 +10,7 @@
         <div class="container">
             <el-row>
                 <el-col :span="5" v-for="(o, index) in recentFilmsData" :key="index" :offset="1" style="margin: 15px;">
-                    <el-card :body-style="{ padding: '8px' }">
+                    <el-card :body-style="{ padding: '8px' }" shadow="hover">
                     <img :src="o.mpicture" class="image">
                     <div style="padding: 14px;">
                         <span>{{o.mname}}</span>
