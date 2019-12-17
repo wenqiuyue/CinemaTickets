@@ -28,9 +28,22 @@
                         {{ scope.$index+1 }}
                     </template>
                 </el-table-column>
-                <el-table-column prop="name" label="影片名" align="center"></el-table-column>
-                <el-table-column prop="address" label="开场时间" align="center"></el-table-column>
-                <el-table-column prop="date" label="放映厅" align="center"  width="120"></el-table-column>
+                <el-table-column prop="film.mname" label="影片名" align="center"></el-table-column>
+                <el-table-column prop="timebegin" label="开场时间" align="center">
+                    <template slot-scope="scope">
+                        {{ scope.row.timebegin | dateFormat }}
+                    </template>
+                </el-table-column>
+                <el-table-column prop="timeend" label="散场时间" align="center">
+                    <template slot-scope="scope">
+                        {{ scope.row.timeend }}
+                    </template>
+                </el-table-column>
+                <el-table-column prop="pid" label="放映厅" align="center"  width="120">
+                    <template slot-scope="scope">
+                        {{ scope.row.pid }}号厅
+                    </template>
+                </el-table-column>
                 <el-table-column label="操作" width="180" align="center">
                     <template slot-scope="scope">
                         <el-button
@@ -62,14 +75,13 @@
         <el-dialog :title="isAdd?'添加':'编辑'" :visible.sync="editVisible" width="40%">
             <el-form ref="form" :model="form" label-width="70px">
                 <el-form-item label="影片">
-                    <el-select v-model="value" placeholder="请选择">
+                    <el-select v-model="value" value-key="mid" placeholder="请选择" @change="changeFilm">
                         <el-option
                             v-for="item in filmsData"
-                            :key="item.value"
-                            :label="item.label"
-                            :value="item.mname"
-                            :disabled="item.disabled"
-                            @change="filmsSel(item)">
+                            :key="item.mid"
+                            :label="item.mname"
+                            :value="item"
+                            :disabled="item.disabled">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -93,26 +105,27 @@
                     </div>                 
                 </el-form-item>
                 <el-form-item label="放映厅">
-                    <el-select v-model="value" placeholder="请选择">
+                    <el-select v-model="valueProjectionHall" value-key="pid" placeholder="请选择">
                         <el-option
-                            v-for="item in filmsData"
-                            :key="item.value"
-                            :label="item.label"
-                            :value="item.value"
+                            v-for="item in projectionHallData"
+                            :key="item.pid"
+                            :label="item.pid"
+                            :value="item.pid"
                             :disabled="item.disabled">
+                            {{item.pid}}号厅
                         </el-option>
                     </el-select>
                 </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
                 <el-button @click="editVisible = false">取 消</el-button>
-                <el-button type="primary" @click="saveEdit">确 定</el-button>
+                <el-button type="primary" @click="isAdd?addEdit():saveEdit()">确 定</el-button>
             </span>
         </el-dialog>
     </div>
 </template>
 <script>
-import { fetchData,getAllRecentFilms } from '../../../api/index';
+import { fetchData,getAllRecentFilms,getAllProjectionHall,getExclusivepiece,addExclusivePiece,getExclusivepieceInfo } from '../../../api/index';
 export default {
     name: "scenearrange",
     data(){
@@ -125,7 +138,6 @@ export default {
             },
             tableData: [],
             multipleSelection: [],
-            delList: [],
             isAdd: true,               //点击添加或编辑的标识
             editVisible: false,        //编辑、添加弹窗
             pageTotal: 0,
@@ -133,25 +145,33 @@ export default {
             idx: -1,
             id: -1,
             filmsData: null,          //近期影片
+            projectionHallData: null, //放映厅数据
             pickerTimeBegin: null,    //开场时间
             pickerTimeEnd: null,      //结束时间
-            value: '',
-            filmsSelValue: null       //选择的电影数据
+            value: null,                //选择的近期影片
+            valueProjectionHall: null,  //选择的放映厅
+            // filmsSelValue: null       //选择的电影数据
         }
     },
      created() {
         this.getData();
-        this.filmsSels()
     },
-    methods:{
-        //电影选择
-        filmsSels(item){
-            console.log(item)
-            this.filmsSelValue = item
-        },
-        //开场时间选定
+    methods: {
+        //开场时间选定,根据选择的电影自动计算结束时间
         handleTimeBegin(){
-            console.log(this.value)
+            var mdurationHours = parseInt(this.value.mduration/60);
+            var mdurationMinutes = this.value.mduration%60;
+            var time=this.pickerTimeBegin;
+            var d = new Date(time);
+            var minutesD = d.getMinutes() + mdurationMinutes;
+            if(minutesD>=60){
+                mdurationHours++;
+                minutesD = minutesD - 60;
+            }
+            var times=d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + (d.getHours()+mdurationHours) + ':' + minutesD + ':' + d.getSeconds();
+            this.pickerTimeEnd = times;
+            this.getProjectionHall();
+            
         },
         //获取近期影片
         getFilms(){
@@ -164,18 +184,61 @@ export default {
                 }
             })
         },
+        //更改选中的影片
+        changeFilm(){
+            if(this.pickerTimeBegin){
+                this.handleTimeBegin();
+            }         
+        },
         //添加场次
         addScene(){
             this.editVisible = true;
             this.isAdd = true;
             this.getFilms();
+            this.getProjectionHall();
+            this.value=null;
+            this.pickerTimeBegin = null;
+            this.pickerTimeEnd = null;
+            this.valueProjectionHall = null;
+        },
+        //获取所有放映厅
+        getProjectionHall(){
+            Promise.all([
+                getAllProjectionHall(),
+                getExclusivepiece()
+            ]).then(res => {
+                if(res[0].code === 0 && res[1].body && this.pickerTimeBegin){   
+                    for(let item of res[0].body){
+                        for(let item1 of res[1].body){
+                            // 转换场次的起始和结束时间
+                            var timeBegin = new Date(item1.timebegin);
+                            var timeEnd = new Date(item1.timeend);
+                            var pickerTime = new Date(this.pickerTimeBegin);
+                            var timeBeginTotal = timeBegin.getHours()*3600 + timeBegin.getMinutes()*60 + timeBegin.getSeconds();
+                            var timeEndTotal = timeEnd.getHours()*3600 + timeEnd.getMinutes()*60 + timeEnd.getSeconds()+900;
+                            var pickerTimeTotal = pickerTime.getHours()*3600 + pickerTime.getMinutes()*60 + pickerTime.getSeconds();
+                            //过滤在选择的时间中已被安排的放映厅
+                            if(pickerTimeTotal>=timeBeginTotal && pickerTimeTotal<=timeEndTotal){
+                                if(item.pid === item1.pid){
+                                    this.$set(item,'disabled',true)
+                                }
+                            }
+                        }
+                    }             
+                    this.projectionHallData = res[0].body
+                }else if(res[0].code === 0){
+                     this.projectionHallData = res[0].body
+                }else{
+                    this.projectionHallData = res[0].message
+                }
+            })
         },
          // 获取数据
         getData() {
-            fetchData(this.query).then(res => {
+            getExclusivepieceInfo().then(res => {
                 console.log(res);
-                this.tableData = res.list;
-                this.pageTotal = res.pageTotal || 50;
+                this.tableData = res.body;
+                // this.pageTotal = res.pageTotal || 50;
             });
         },      
         // 删除操作
@@ -197,12 +260,27 @@ export default {
             this.form = row;
             this.editVisible = true;
             this.getFilms();
+            this.getProjectionHall();
         },
-        // 保存编辑
+        // 编辑确定
         saveEdit() {
             this.editVisible = false;
             this.$message.success(`修改第 ${this.idx + 1} 行成功`);
             this.$set(this.tableData, this.idx, this.form);
+        },
+        //添加确定
+        addEdit(){
+            console.log(this.value.mid+" "+this.valueProjectionHall+" "+this.pickerTimeBegin+" "+this.pickerTimeEnd)
+            let data={
+                mid: this.value.mid,
+                pid: this.valueProjectionHall,
+                timebegin: this.pickerTimeBegin,
+                timeend: this.pickerTimeEnd
+            }
+            addExclusivePiece(data).then(res => {
+                console.log(res)
+            })
+            this.editVisible = false;
         },
         // 分页导航
         handlePageChange(val) {

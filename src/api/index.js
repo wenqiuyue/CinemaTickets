@@ -130,6 +130,28 @@ export function getAllProjectionHall(){
       method: 'get',
       params:data
    })
- }
+ };
+  //单表查询场次
+ export function getExclusivepiece(){
+   return request({
+    url: '/manager/getExclusivepiece',
+    method: 'get'
+   })
+ };
+//添加场次安排
+export function addExclusivePiece(data){
+  return request({
+    url: '/manager/addExclusivePiece',
+    method: 'post',
+    data
+  })
+};
+//多表获取排片信息
+export function getExclusivepieceInfo(){
+  return request({
+    url: '/manager/getExclusivepieceInfo',
+    method: 'get'
+  })
+}
 
 
