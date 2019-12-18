@@ -147,11 +147,35 @@ export function addExclusivePiece(data){
   })
 };
 //多表获取排片信息
-export function getExclusivepieceInfo(){
+export function getExclusivepieceInfo(data){
   return request({
     url: '/manager/getExclusivepieceInfo',
+    method: 'post',
+    data
+  })
+};
+//获取场次数量
+export function getExclusivepieceCount(){
+  return request({
+    url: '/manager/getExclusivepieceCount',
     method: 'get'
   })
-}
+};
+//根据电影名字对场次安排模糊查询
+export function gettExclusivepieceByName(data){
+  return request({
+    url: '/manager/gettExclusivepieceByName',
+    method: 'post',
+    data
+  })
+};
+//获取电影名模糊查询场次的数量
+export function getExclusivepieceByNameCount(data){
+  return request({
+    url: '/manager/getExclusivepieceByNameCount',
+    method: 'get',
+    params:data
+  })
+};
 
 

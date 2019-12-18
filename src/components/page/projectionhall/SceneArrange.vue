@@ -15,6 +15,8 @@
                     class="handle-del mr10"
                     @click="addScene"
                 >添加场次</el-button>
+                <el-input v-model="query.name" placeholder="请输入影片" class="handle-input mr10"></el-input>
+                <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
             </div>
             <el-table
                 :data="tableData"
@@ -125,18 +127,18 @@
     </div>
 </template>
 <script>
-import { fetchData,getAllRecentFilms,getAllProjectionHall,getExclusivepiece,addExclusivePiece,getExclusivepieceInfo } from '../../../api/index';
+import { fetchData,getAllRecentFilms,getAllProjectionHall,getExclusivepiece,addExclusivePiece,getExclusivepieceInfo,gettExclusivepieceByName,getExclusivepieceCount,getExclusivepieceByNameCount } from '../../../api/index';
 export default {
     name: "scenearrange",
     data(){
         return{
              query: {
-                address: '',
-                name: '',
-                pageIndex: 1,
-                pageSize: 10
+                name: null,    //搜索的电影名字
+                pageIndex: 1,  //当前页数
+                pageSize: 7   //每页显示条目个数
             },
             tableData: [],
+            isSearch: false,  //是否点击搜索按钮 
             multipleSelection: [],
             isAdd: true,               //点击添加或编辑的标识
             editVisible: false,        //编辑、添加弹窗
@@ -151,6 +153,18 @@ export default {
             value: null,                //选择的近期影片
             valueProjectionHall: null,  //选择的放映厅
             // filmsSelValue: null       //选择的电影数据
+        }
+    },
+     computed:{
+        //监听搜索框的影片名是否发生改变
+        watchSearchName(){ return this.query.name}
+    },
+    watch:{
+        watchSearchName(_new, _old){
+            if(this.isSearch === true){
+                this.isSearch = false
+                this.getData();
+            }          
         }
     },
      created() {
@@ -235,11 +249,17 @@ export default {
         },
          // 获取数据
         getData() {
-            getExclusivepieceInfo().then(res => {
-                console.log(res);
-                this.tableData = res.body;
-                // this.pageTotal = res.pageTotal || 50;
-            });
+             let data={
+                pageIndex: this.query.pageSize*(this.query.pageIndex-1),
+                pageSize: this.query.pageSize  
+            }
+            Promise.all([
+                getExclusivepieceCount(),
+                getExclusivepieceInfo(data)
+            ]).then(res => {
+                this.pageTotal = res[0]
+                this.tableData = res[1].body;
+            })
         },      
         // 删除操作
         handleDelete(index, row) {
@@ -285,8 +305,29 @@ export default {
         // 分页导航
         handlePageChange(val) {
             this.$set(this.query, 'pageIndex', val);
-            this.getData();
+            if(this.isSearch === true){
+                this.handleSearch()
+            }else{
+                this.getData();
+            }    
         }, 
+        //搜索
+        handleSearch(){
+            this.isSearch = true
+            let data={
+                pageIndex: this.query.pageSize*(this.query.pageIndex-1),
+                pageSize: this.query.pageSize,
+                name: this.query.name  
+            }
+            Promise.all([
+                getExclusivepieceByNameCount({name:this.query.name}),
+                gettExclusivepieceByName(data),
+            ]).then(res => {
+                console.log(res)
+                this.pageTotal = res[0]
+                this.tableData = res[1].body;
+            })
+        }
     }
 }
 </script>
