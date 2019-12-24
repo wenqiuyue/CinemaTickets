@@ -32,8 +32,8 @@ export default {
     data: function() {
         return {
             param: {
-                username: "",
-                password: "",
+                username: null,
+                password: null,
             },
             rules: {
                 username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
@@ -59,9 +59,9 @@ export default {
                             //如果当用户类型为0时，走后台管理员界面，等于1时，走会员界面
                             if(res.body.utype === 0){
                                 this.$message.success('登录成功');
-                                this.$router.push({path:'/'});
+                                this.$router.push({path:'/dashboard'});
                             }else if(res.body.utype === 1){
-                                return;
+                                this.$router.push({path:'/filmIndex'});
                             }
                         }else if(res.code === 1000){
                             this.$message.warning(res.message);

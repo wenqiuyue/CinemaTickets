@@ -127,7 +127,7 @@
     </div>
 </template>
 <script>
-import { fetchData,getAllRecentFilms,getAllProjectionHall,getExclusivepiece,addExclusivePiece,getExclusivepieceInfo,gettExclusivepieceByName,getExclusivepieceCount,getExclusivepieceByNameCount } from '../../../api/index';
+import { fetchData,getAllRecentFilms,getAllProjectionHall,getExclusivepiece,addExclusivePiece,getExclusivepieceInfo,gettExclusivepieceByName,getExclusivepieceCount,getExclusivepieceByNameCount,UpdateExclusivepieceById,delExclusivepieceById } from '../../../api/index';
 export default {
     name: "scenearrange",
     data(){
@@ -152,7 +152,8 @@ export default {
             pickerTimeEnd: null,      //结束时间
             value: null,                //选择的近期影片
             valueProjectionHall: null,  //选择的放映厅
-            // filmsSelValue: null       //选择的电影数据
+            mname: null,
+            filmInfo: null
         }
     },
      computed:{
@@ -173,19 +174,23 @@ export default {
     methods: {
         //开场时间选定,根据选择的电影自动计算结束时间
         handleTimeBegin(){
-            var mdurationHours = parseInt(this.value.mduration/60);
-            var mdurationMinutes = this.value.mduration%60;
-            var time=this.pickerTimeBegin;
-            var d = new Date(time);
-            var minutesD = d.getMinutes() + mdurationMinutes;
-            if(minutesD>=60){
-                mdurationHours++;
-                minutesD = minutesD - 60;
-            }
-            var times=d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + (d.getHours()+mdurationHours) + ':' + minutesD + ':' + d.getSeconds();
-            this.pickerTimeEnd = times;
-            this.getProjectionHall();
-            
+            if(!this.mname){
+                this.$message.error("请选择影片");
+            }else{
+                var mdurationHours = parseInt(this.value.mduration/60);
+                var mdurationMinutes = this.value.mduration%60;
+                var time=this.pickerTimeBegin;
+                var d = new Date(time);
+                var minutesD = d.getMinutes() + mdurationMinutes;
+                if(minutesD>=60){
+                    mdurationHours++;
+                    minutesD = minutesD - 60;
+                }
+                var times=d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + (d.getHours()+mdurationHours) + ':' + minutesD + ':' + d.getSeconds();
+                this.pickerTimeEnd = times;
+                this.getProjectionHall();
+                console.log(this.pickerTimeEnd)
+            }       
         },
         //获取近期影片
         getFilms(){
@@ -200,6 +205,8 @@ export default {
         },
         //更改选中的影片
         changeFilm(){
+            console.log(this.value)
+            this.mname = this.value.mname          
             if(this.pickerTimeBegin){
                 this.handleTimeBegin();
             }         
@@ -211,6 +218,7 @@ export default {
             this.getFilms();
             this.getProjectionHall();
             this.value=null;
+            this.mname = null;
             this.pickerTimeBegin = null;
             this.pickerTimeEnd = null;
             this.valueProjectionHall = null;
@@ -268,25 +276,55 @@ export default {
                 type: 'warning'
             })
                 .then(() => {
-                    this.$message.success('删除成功');
-                    this.tableData.splice(index, 1);
+                    delExclusivepieceById({eid:row.eid}).then(res => {
+                        if(res === true){
+                            this.$message.success('删除成功');
+                            this.tableData.splice(index, 1);
+                        }else{
+                            this.$message.success('删除失败');
+                        }
+                    })
+                    
                 })
                 .catch(() => {});
         },
         // 编辑操作
         handleEdit(index, row) {
-            this.isAdd = false;
-            this.idx = index;
-            this.form = row;
             this.editVisible = true;
             this.getFilms();
             this.getProjectionHall();
+            this.isAdd = false;
+            this.$nextTick(() => {
+                this.value = row.film,
+                this.pickerTimeBegin = row.timebegin,
+                this.pickerTimeEnd = row.timeend,
+                // this.value.mduration = row.film.mduration,
+                this.valueProjectionHall = row.pid
+            })  
+            this.filmInfo = row  
+            this.idx = index;
+            this.value = row
+            
+            
         },
         // 编辑确定
         saveEdit() {
-            this.editVisible = false;
-            this.$message.success(`修改第 ${this.idx + 1} 行成功`);
-            this.$set(this.tableData, this.idx, this.form);
+            let data={
+                mid: this.value.mid,
+                pid: this.valueProjectionHall,
+                timebegin: this.pickerTimeBegin,
+                timeend: this.pickerTimeEnd,
+                eid: this.filmInfo.eid
+            }
+            UpdateExclusivepieceById(data).then(res => {
+                if(res === true){
+                    this.$message.success(`修改第 ${this.idx + 1} 行成功`);
+                    this.getData();
+                }else{
+                    this.$message.success("修改失败请重试");
+                }
+            })
+            this.editVisible = false;        
         },
         //添加确定
         addEdit(){
@@ -298,7 +336,9 @@ export default {
                 timeend: this.pickerTimeEnd
             }
             addExclusivePiece(data).then(res => {
-                console.log(res)
+                if(res === true){
+                    this.getData();
+                }
             })
             this.editVisible = false;
         },

@@ -177,5 +177,27 @@ export function getExclusivepieceByNameCount(data){
     params:data
   })
 };
-
+//删除场次
+export function delExclusivepieceById(data){
+  return request({
+    url: '/manager/delExclusivepieceById',
+    method: 'get',
+    params:data
+  })
+};
+//编辑场次
+export function UpdateExclusivepieceById(data){
+  return request({
+    url: '/manager/UpdateExclusivepieceById',
+    method: 'post',
+    data
+  })
+};
+//获取近期热门电影
+export function GetAllPopularRecentFilms(){
+  return request({
+    url: '/manager/GetAllPopularRecentFilms',
+    method: 'get',
+  })
+}
 

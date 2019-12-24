@@ -8,7 +8,7 @@ export default new Router({
     routes: [
         {
             path: '/',
-            redirect: '/dashboard'
+            redirect: '/filmIndex'
         },
         {
             path: '/',
@@ -134,6 +134,16 @@ export default new Router({
         {
             path: '*',
             redirect: '/404'
-        }
+        },
+        {
+            path: '/filmIndex',
+            component: () => import(/* webpackChunkName: "login" */ '../components/page/user/FilmIndex.vue'),
+            meta: { title: '电影院首页' }
+        },
+        {
+            path: '/filmexclusivepiece',
+            component: () => import(/* webpackChunkName: "login" */ '../components/page/user/FilmExclusivePiece.vue'),
+            meta: { title: '电影排片' }
+        },
     ]
 });
