@@ -199,5 +199,28 @@ export function GetAllPopularRecentFilms(){
     url: '/manager/GetAllPopularRecentFilms',
     method: 'get',
   })
+};
+//根据电影id查询电影信息
+export function GetFilmById(data){
+  return request({
+    url: '/manager/GetFilmById',
+    method: 'get',
+    params: data
+  })
+};
+//根据电影id查询电影排片
+export function GetExclusivePieceById(data){
+  return request({
+    url: '/manager/GetExclusivePieceById',
+    method: 'get',
+    params: data
+  })
+};
+//删除不是当日的排片数据
+export function DelExclusivepieceNotTody(){
+  return request({
+    url: '/manager/DelExclusivepieceNotTody',
+    method: 'get',
+  })
 }
 

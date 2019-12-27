@@ -16,6 +16,9 @@ import moment from 'moment'
 Vue.filter('dateFormat',function (dataStr,pattern="YYYY-MM-DD HH:mm") {
     return moment(dataStr).format(pattern);
 })
+Vue.filter('timeFormat',function (dataStr,pattern="HH:mm") {
+    return moment(dataStr).format(pattern);
+})
 import ElementUI from 'element-ui';
 import VueI18n from 'vue-i18n';
 import { messages } from './components/common/i18n';

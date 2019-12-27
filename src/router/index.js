@@ -145,5 +145,15 @@ export default new Router({
             component: () => import(/* webpackChunkName: "login" */ '../components/page/user/FilmExclusivePiece.vue'),
             meta: { title: '电影排片' }
         },
+        {
+            path: '/filmintroduce',
+            component: () => import(/* webpackChunkName: "login" */ '../components/page/user/FilmIntroduce.vue'),
+            meta: { title: '电影简介' }
+        },
+        {
+            path: '/filmscore',
+            component: () => import(/* webpackChunkName: "login" */ '../components/page/user/FilmScore.vue'),
+            meta: { title: '评分' }
+        },
     ]
 });

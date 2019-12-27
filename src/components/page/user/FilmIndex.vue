@@ -44,7 +44,7 @@
             </div>
             <div class="more">
                 <el-card class="box-card" v-for="(item,index) of recentFilmsList" :key="index" :body-style="{ padding: '6px' }">
-                    <div class="more-card">
+                    <div class="more-card" @click="filmHandle(item)">
                         <div>
                             <img :src="item.mpicture" class="image">
                         </div>
@@ -63,7 +63,7 @@
 </template>
 <script>
 import BScroll from 'better-scroll';
-import { getAllRecentFilms,GetAllPopularRecentFilms } from '../../../api/index';
+import { getAllRecentFilms,GetAllPopularRecentFilms,DelExclusivepieceNotTody } from '../../../api/index';
 export default {
     name: 'filmIndex',
     data() {
@@ -84,9 +84,9 @@ export default {
         this.getAllPopularRecentFilmsData();
     },
     mounted() {   
-        // this.$nextTick(() => {
-        //     this.verScroll();
-        // });
+        DelExclusivepieceNotTody().then(res => {
+          console.log("删除了"+res+"条记录")  
+        })
     },
     methods: {
         //导航条
@@ -129,8 +129,7 @@ export default {
         },
         //点击某个电影
         filmHandle(item){
-            this.$router.push({path: '/filmexclusivepiece', query: { film: JSON.stringify(item) }})
-            console.log(item)
+            this.$router.push({path: '/filmexclusivepiece', query: { filmId: item.mid }})
         },
     }
 };

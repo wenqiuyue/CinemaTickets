@@ -1,20 +1,38 @@
 <template>
-    <el-page-header @back="goBack" content="详情页面" class="return">
-    </el-page-header>
+    <van-nav-bar
+      :title="title"
+      left-text="返回"
+      left-arrow
+      @click-left="onClickLeft"
+      class="title"
+    />
 </template>
 <script>
+import Vue from 'vue';
+import { NavBar } from 'vant';
+
+Vue.use(NavBar);
 export default {
     nama:'returnH',
+    props:{
+      title: String
+    },
     methods: {
-      goBack() {
-        console.log('go back');
-      }
+      onClickLeft() {
+        this.$router.go(-1);
+      },
+      
     }
 }
 </script>
 <style lang="scss" scoped>
-    .return{
-        background: #2196F3;
-        
+    .title{
+        background:#545c64;
+        .van-nav-bar__title,.van-nav-bar__text{
+          color: white;
+        }  
+    }
+    .van-nav-bar .van-icon{
+      color: white;
     }
 </style>

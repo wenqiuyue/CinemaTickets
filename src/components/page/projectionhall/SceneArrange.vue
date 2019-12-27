@@ -31,6 +31,8 @@
                     </template>
                 </el-table-column>
                 <el-table-column prop="film.mname" label="影片名" align="center"></el-table-column>
+                <el-table-column prop="mlanguage" label="语言" align="center" width="120"></el-table-column>
+                <el-table-column prop="meffect" label="效果" align="center" width="120"></el-table-column>
                 <el-table-column prop="timebegin" label="开场时间" align="center">
                     <template slot-scope="scope">
                         {{ scope.row.timebegin | dateFormat }}
@@ -44,6 +46,11 @@
                 <el-table-column prop="pid" label="放映厅" align="center"  width="120">
                     <template slot-scope="scope">
                         {{ scope.row.pid }}号厅
+                    </template>
+                </el-table-column>
+                <el-table-column prop="mprice" label="价格" align="center" width="120">
+                    <template slot-scope="scope">
+                        ￥{{ scope.row.mprice }}
                     </template>
                 </el-table-column>
                 <el-table-column label="操作" width="180" align="center">
@@ -87,6 +94,27 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
+                <el-form-item label="语言">
+                    <el-select v-model="selLanguage" value-key="pid" placeholder="请选择">
+                        <el-option
+                            v-for="item in language"
+                            :key="item"
+                            :label="item"
+                            :value="item">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="效果">
+                    <el-select v-model="seleffect" value-key="pid" placeholder="请选择">
+                        <el-option
+                            v-for="item in effect"
+                            :key="item"
+                            :label="item"
+                            :value="item"
+                        >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
                 <el-form-item label="时间">
                     <div class="picker-time">
                         <el-time-picker
@@ -118,6 +146,9 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
+                <el-form-item label="价格" prop="price">
+                    <el-input v-model="price"></el-input>
+                </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
                 <el-button @click="editVisible = false">取 消</el-button>
@@ -127,7 +158,7 @@
     </div>
 </template>
 <script>
-import { fetchData,getAllRecentFilms,getAllProjectionHall,getExclusivepiece,addExclusivePiece,getExclusivepieceInfo,gettExclusivepieceByName,getExclusivepieceCount,getExclusivepieceByNameCount,UpdateExclusivepieceById,delExclusivepieceById } from '../../../api/index';
+import { DelExclusivepieceNotTody,fetchData,getAllRecentFilms,getAllProjectionHall,getExclusivepiece,addExclusivePiece,getExclusivepieceInfo,gettExclusivepieceByName,getExclusivepieceCount,getExclusivepieceByNameCount,UpdateExclusivepieceById,delExclusivepieceById } from '../../../api/index';
 export default {
     name: "scenearrange",
     data(){
@@ -153,7 +184,12 @@ export default {
             value: null,                //选择的近期影片
             valueProjectionHall: null,  //选择的放映厅
             mname: null,
-            filmInfo: null
+            filmInfo: null,
+            language: ['国语','英语'],   //语言
+            effect: ['2D','3D','5D'],    //效果
+            price: null,                 //价格
+            selLanguage: null,           //选择的语言
+            seleffect: null              //选择的效果
         }
     },
      computed:{
@@ -170,6 +206,11 @@ export default {
     },
      created() {
         this.getData();
+    },
+    mounted(){
+        DelExclusivepieceNotTody().then(res => {
+          console.log("删除了"+res+"条记录")  
+        })
     },
     methods: {
         //开场时间选定,根据选择的电影自动计算结束时间
@@ -188,14 +229,12 @@ export default {
                 }
                 var times=d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + (d.getHours()+mdurationHours) + ':' + minutesD + ':' + d.getSeconds();
                 this.pickerTimeEnd = times;
-                this.getProjectionHall();
-                console.log(this.pickerTimeEnd)
+                this.getProjectionHall(this.value.mduration);
             }       
         },
         //获取近期影片
         getFilms(){
             getAllRecentFilms().then(res => {
-                console.log(res)
                 if(res.code === 0){
                     this.filmsData = res.body
                 }else{
@@ -205,7 +244,6 @@ export default {
         },
         //更改选中的影片
         changeFilm(){
-            console.log(this.value)
             this.mname = this.value.mname          
             if(this.pickerTimeBegin){
                 this.handleTimeBegin();
@@ -216,20 +254,22 @@ export default {
             this.editVisible = true;
             this.isAdd = true;
             this.getFilms();
-            this.getProjectionHall();
             this.value=null;
             this.mname = null;
             this.pickerTimeBegin = null;
             this.pickerTimeEnd = null;
             this.valueProjectionHall = null;
+            this.selLanguage = null;
+            this.seleffect = null;
+            this.price = null;
         },
         //获取所有放映厅
-        getProjectionHall(){
+        getProjectionHall(mduration){
             Promise.all([
                 getAllProjectionHall(),
                 getExclusivepiece()
             ]).then(res => {
-                if(res[0].code === 0 && res[1].body && this.pickerTimeBegin){   
+                if(res[0].code === 0 && res[1].body && mduration && this.pickerTimeBegin){   
                     for(let item of res[0].body){
                         for(let item1 of res[1].body){
                             // 转换场次的起始和结束时间
@@ -237,10 +277,11 @@ export default {
                             var timeEnd = new Date(item1.timeend);
                             var pickerTime = new Date(this.pickerTimeBegin);
                             var timeBeginTotal = timeBegin.getHours()*3600 + timeBegin.getMinutes()*60 + timeBegin.getSeconds();
-                            var timeEndTotal = timeEnd.getHours()*3600 + timeEnd.getMinutes()*60 + timeEnd.getSeconds()+900;
+                            var timeEndTotal = timeEnd.getHours()*3600 + timeEnd.getMinutes()*60 + timeEnd.getSeconds();
                             var pickerTimeTotal = pickerTime.getHours()*3600 + pickerTime.getMinutes()*60 + pickerTime.getSeconds();
+                            var pickerTimeMduration = pickerTimeTotal + mduration*60;
                             //过滤在选择的时间中已被安排的放映厅
-                            if(pickerTimeTotal>=timeBeginTotal && pickerTimeTotal<=timeEndTotal){
+                            if((pickerTimeTotal>=timeBeginTotal && pickerTimeTotal<=timeEndTotal) || (pickerTimeMduration>=timeBeginTotal && pickerTimeMduration<=timeEndTotal)){
                                 if(item.pid === item1.pid){
                                     this.$set(item,'disabled',true)
                                 }
@@ -290,6 +331,7 @@ export default {
         },
         // 编辑操作
         handleEdit(index, row) {
+            console.log(row)
             this.editVisible = true;
             this.getFilms();
             this.getProjectionHall();
@@ -299,7 +341,11 @@ export default {
                 this.pickerTimeBegin = row.timebegin,
                 this.pickerTimeEnd = row.timeend,
                 // this.value.mduration = row.film.mduration,
-                this.valueProjectionHall = row.pid
+                this.valueProjectionHall = row.pid,
+                this.selLanguage = row.mlanguage,
+                this.seleffect = row.meffect,
+                this.price = row.mprice
+
             })  
             this.filmInfo = row  
             this.idx = index;
@@ -314,7 +360,10 @@ export default {
                 pid: this.valueProjectionHall,
                 timebegin: this.pickerTimeBegin,
                 timeend: this.pickerTimeEnd,
-                eid: this.filmInfo.eid
+                eid: this.filmInfo.eid,
+                mlanguage: this.selLanguage,
+                meffect: this.seleffect,
+                mprice: this.price
             }
             UpdateExclusivepieceById(data).then(res => {
                 if(res === true){
@@ -333,7 +382,10 @@ export default {
                 mid: this.value.mid,
                 pid: this.valueProjectionHall,
                 timebegin: this.pickerTimeBegin,
-                timeend: this.pickerTimeEnd
+                timeend: this.pickerTimeEnd,
+                mlanguage: this.selLanguage,
+                meffect: this.seleffect,
+                mprice: this.price
             }
             addExclusivePiece(data).then(res => {
                 if(res === true){
@@ -363,7 +415,6 @@ export default {
                 getExclusivepieceByNameCount({name:this.query.name}),
                 gettExclusivepieceByName(data),
             ]).then(res => {
-                console.log(res)
                 this.pageTotal = res[0]
                 this.tableData = res[1].body;
             })
