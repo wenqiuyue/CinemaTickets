@@ -10,21 +10,30 @@
                 style="filter: blur(3px);opacity:0.8;"
             />
             <div class="cont" @click="filmIntroduce">
-                <img
-                    class="cont-img"
-                    :src="film?film.mpicture:''"
-                />
+                <img class="cont-img" :src="film?film.mpicture:''" />
                 <div class="text">
                     <div class="item">{{film?film.mname:''}}</div>
-                    <div class="score"><span class="score-film">{{film?film.score:''}}</span></div>
+                    <div class="score">
+                        <span class="score-film">{{film?film.score:''}}分</span>
+                    </div>
                     <div class="mtype">{{film?film.mtype:''}}</div>
                     <div class="mtype">{{film?film.mcountry:''}} / {{film?film.mduration:''}}分钟</div>
                     <div class="mtype">{{film?film.releasetime:'' | dateFormat}}大陆上映</div>
                 </div>
-                    <el-button type="info" icon="el-icon-arrow-right" circle class="arrowbuton"></el-button>
+                <el-button type="info" icon="el-icon-arrow-right" circle class="arrowbuton"></el-button>
                 <div class="cont-button">
-                    <el-button type="info" class="button" icon="el-icon-lx-likefill" @click.stop="wantToSee">想看</el-button>
-                    <el-button type="info" class="button" icon="el-icon-lx-favorfill" @click.stop="score">评分</el-button>
+                    <el-button
+                        type="info"
+                        class="button"
+                        icon="el-icon-lx-likefill"
+                        @click.stop="wantToSee"
+                    >想看</el-button>
+                    <el-button
+                        type="info"
+                        class="button"
+                        icon="el-icon-lx-favorfill"
+                        @click.stop="score"
+                    >评分</el-button>
                 </div>
             </div>
         </div>
@@ -58,213 +67,225 @@
 </template>
 <script>
 import returnH from '../../common/return.vue';
-import { GetFilmById,GetExclusivePieceById } from '../../../api/index';
+import { GetFilmById, GetExclusivePieceById, GetFilmReviewByMid } from '../../../api/index';
 import Vue from 'vue';
-import { Image,NoticeBar } from 'vant';
+import { Image, NoticeBar } from 'vant';
 Vue.use(Image);
 Vue.use(NoticeBar);
 export default {
-    name:"filmexclusivepiece",
+    name: 'filmexclusivepiece',
     components: {
         returnH
     },
-    data(){
-        return{
-            text: "新视界，新天地，心享受! 高保真优质视听效果，给你身临其境的感觉。",
-            film: null,    //选择的电影数据
-            exclusivepieceData: null,   //排片数据
-            mid: this.$route.query.filmId  // 选择的影片id
-        }
+    data() {
+        return {
+            text: '新视界，新天地，心享受! 高保真优质视听效果，给你身临其境的感觉。',
+            film: null, //选择的电影数据
+            exclusivepieceData: null, //排片数据
+            mid: this.$route.query.filmId // 选择的影片id
+        };
     },
-    created(){
+    created() {
         //获取点击的电影的信息
-        GetFilmById({mid:this.mid}).then(res => {
-            if(res.code === 0){
-                this.film = res.body
+        GetFilmById({ mid: this.mid }).then(res => {
+            if (res.code === 0) {
+                this.film = res.body;
             }
-        })
+        });
         this.getExclusivepieceData();
-        console.log(this.mid)
+        this.getFilmScore();
+        console.log(this.mid);
     },
-    mounted(){
-        
-    },
-    methods:{
+    mounted() {},
+    methods: {
         //获取排片数据
-        getExclusivepieceData(){
-            GetExclusivePieceById({mid:this.mid}).then(res => {
-                if(res.code === 0){
-                    this.exclusivepieceData = res.body
-                    if(res.body.length>0){
-                        this.exclusivepieceData = res.body
-                    }else{
-                        this.exclusivepieceData = null
-                    }              
-                    console.log(this.exclusivepieceData )
-                }else{
-                    return
+        getExclusivepieceData() {
+            GetExclusivePieceById({ mid: this.mid }).then(res => {
+                if (res.code === 0) {
+                    this.exclusivepieceData = res.body;
+                    if (res.body.length > 0) {
+                        this.exclusivepieceData = res.body;
+                    } else {
+                        this.exclusivepieceData = null;
+                    }
+                    console.log(this.exclusivepieceData);
+                } else {
+                    return;
                 }
-            })
+            });
         },
         //获取电影详情介绍
-        filmIntroduce(){
-            this.$router.push("/filmIntroduce")
+        filmIntroduce() {
+            this.$router.push('/filmIntroduce');
         },
         //想看
-        wantToSee(){
-            console.log("想看")
+        wantToSee() {
+            console.log('想看');
         },
         //评分
-        score(){
-            console.log("评分")
-            this.$router.push({path:"/filmscore",query:{filmId:this.mid}})
+        score() {
+            console.log('评分');
+            this.$router.push({ path: '/filmscore', query: { filmId: this.mid } });
+        },
+        /**
+         * 获取影片分数
+         */
+        getFilmScore() {
+            GetFilmReviewByMid({ mid: this.mid }).then(res => {
+                if (res.code === 0) {
+                    let sum = 0;
+                    res.body.forEach(element => {
+                        sum += element;
+                    });
+                    this.film.score = (sum / res.body.length).toFixed(1);
+                } else {
+                    this.film.score = 0;
+                }
+            });
         }
     }
-
-}
+};
 </script>
 <style lang="scss" scoped>
-    .head{
-        position: relative;
-        .cont{
-         
-            height: 13rem;
-            position: absolute;
-            top: 0;
-            padding: 13px 0 0 13px;
-            .cont-img{
-                width: 110px;
-                height: 140px;
-                float: left;
-                display: block;
-            }
-            .text{
-                width: 200px;
-                margin-left: 120px;
-                .item {
-                    color: white;
-                    font-size: 16px;
-                    margin-top: 5px;
-                    font-weight: bold;
-                }
-                .score{
-                    margin-top: 8px;
-                    color: #EBEBEB;
-                    font-size: 13px;
-                    .score-film{
-                        font-size: 20px;
-                        color: #FEC601;
-                    }
-                }
-                .mtype{
-                    color: white;
-                    font-size: 13px;
-                    margin-top: 7px;
-                    opacity:0.8;
-                }
-            }
-            .arrowbuton{ 
-               float: right;
-                margin-top: -80px;
-                left: 20px;;
-            }
-            .cont-button{
-                height: 20%;
-                width: 100%;
-                margin: 15px 0 0 5%;
-                display: flex;
-                justify-content: space-around;
-                align-items: center;
-                .button{
-                    width: 50%;
-                    height: 82%;
-                    background-color: gray;
-                    opacity:0.6;
-                    font-size: 13px;
-                }
-            }
+.head {
+    position: relative;
+    .cont {
+        height: 13rem;
+        position: absolute;
+        top: 0;
+        padding: 13px 0 0 13px;
+        .cont-img {
+            width: 110px;
+            height: 140px;
+            float: left;
+            display: block;
         }
-    }
-    .time{
-        background: #F4F4F4;
-        .time-card{
-            background: white;
-            width: 100%;
-            height: 55px;
-            display: flex;
-            flex-direction: row;
-            margin-top: 2px;
-            .begin-time{
-                width: 25%;
-                height: 39px;
-                text-align: center;
-                padding: 8px 0;
-                .begin-time-span{
-                    display: block;
+        .text {
+            width: 200px;
+            margin-left: 120px;
+            .item {
+                color: white;
+                font-size: 16px;
+                margin-top: 5px;
+                font-weight: bold;
+            }
+            .score {
+                margin-top: 8px;
+                color: #ebebeb;
+                font-size: 13px;
+                .score-film {
                     font-size: 20px;
-                }
-                .end-time{
-                    font-size: 12px;
-                    color:#B1B1B1;             
+                    color: #fec601;
                 }
             }
-            .hall{
-                width: 25%;
-                height: 35px;
-                padding: 10px 0;
-                span:first-child{
-                    display: block;
-                    font-size: 14px;
-                    color: black;
-                    margin-bottom: 2px;
-                }
-                span{
-                    font-size: 12px;
-                    color:#B1B1B1;
-                }
+            .mtype {
+                color: white;
+                font-size: 13px;
+                margin-top: 7px;
+                opacity: 0.8;
             }
-            .price{
-                width: 30%;
-                height: 39px;
-                padding: 8px 0;
-                text-align: center;
-                span:first-child{
-                    display: block;
-                    color: #F04C43;
-                    margin-bottom: 2px;
-                }
-                .tag{
-                    background: #FF9001;
-                    font-size: 11px;
-                    color: white;
-                    padding: 1px 5px;
-                    border-radius: 1px;
-                }
-                .tag-price{
-                    border: 1px solid #FF9001;
-                    color: #FF9001;
-                    font-size: 11px;
-                    border-radius: 1px;
-                }
-            }
-            .buy{
-                width: 20%;
-                height: 50px;
-                line-height: 50px;
-                text-align: center;
-                .tag-buy{
-                    border: 1px solid #F04C43;
-                    color: #F04C43;
-                    font-size: 13px;
-                    border-radius: 1px;
-                    padding: 5px 10px;
-                }
+        }
+        .arrowbuton {
+            float: right;
+            margin-top: -80px;
+            left: 20px;
+        }
+        .cont-button {
+            height: 20%;
+            width: 100%;
+            margin: 15px 0 0 5%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            .button {
+                width: 50%;
+                height: 82%;
+                background-color: gray;
+                opacity: 0.6;
+                font-size: 13px;
             }
         }
     }
-    .noexclusivepiece{
-        margin: 10px 25%;
-        text-align: center;
+}
+.time {
+    background: #f4f4f4;
+    .time-card {
+        background: white;
+        width: 100%;
+        height: 55px;
+        display: flex;
+        flex-direction: row;
+        margin-top: 2px;
+        .begin-time {
+            width: 25%;
+            height: 39px;
+            text-align: center;
+            padding: 8px 0;
+            .begin-time-span {
+                display: block;
+                font-size: 20px;
+            }
+            .end-time {
+                font-size: 12px;
+                color: #b1b1b1;
+            }
+        }
+        .hall {
+            width: 25%;
+            height: 35px;
+            padding: 10px 0;
+            span:first-child {
+                display: block;
+                font-size: 14px;
+                color: black;
+                margin-bottom: 2px;
+            }
+            span {
+                font-size: 12px;
+                color: #b1b1b1;
+            }
+        }
+        .price {
+            width: 30%;
+            height: 39px;
+            padding: 8px 0;
+            text-align: center;
+            span:first-child {
+                display: block;
+                color: #f04c43;
+                margin-bottom: 2px;
+            }
+            .tag {
+                background: #ff9001;
+                font-size: 11px;
+                color: white;
+                padding: 1px 5px;
+                border-radius: 1px;
+            }
+            .tag-price {
+                border: 1px solid #ff9001;
+                color: #ff9001;
+                font-size: 11px;
+                border-radius: 1px;
+            }
+        }
+        .buy {
+            width: 20%;
+            height: 50px;
+            line-height: 50px;
+            text-align: center;
+            .tag-buy {
+                border: 1px solid #f04c43;
+                color: #f04c43;
+                font-size: 13px;
+                border-radius: 1px;
+                padding: 5px 10px;
+            }
+        }
     }
-    
+}
+.noexclusivepiece {
+    margin: 10px 25%;
+    text-align: center;
+}
 </style>
