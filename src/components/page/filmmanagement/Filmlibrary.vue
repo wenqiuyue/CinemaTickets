@@ -27,9 +27,7 @@
                 header-cell-class-name="table-header"
             >
                 <el-table-column label="序号" width="55" align="center">
-                    <template slot-scope="scope">
-                        {{ scope.$index+1 }}
-                    </template>
+                    <template slot-scope="scope">{{ scope.$index+1 }}</template>
                 </el-table-column>
                 <el-table-column label="影片图片" align="center" width="100">
                     <template slot-scope="scope">
@@ -40,22 +38,23 @@
                 <el-table-column prop="mtype" label="影片类型" align="center"></el-table-column>
                 <el-table-column prop="mcountry" label="拍摄国家" align="center"></el-table-column>
                 <el-table-column prop="releasetime" label="上映时间" align="center">
-                    <template slot-scope="scope">
-                        {{ scope.row.releasetime | dateFormat }}
-                    </template>
+                    <template slot-scope="scope">{{ scope.row.releasetime | dateFormat }}</template>
                 </el-table-column>
                 <el-table-column prop="mduration" label="影片时长" align="center"></el-table-column>
-                <el-table-column prop="mintroduction" label="影片简介" align="center">        
+                <el-table-column prop="mintroduction" label="影片简介" align="center">
                     <template slot-scope="scope">
-                        <el-tooltip  effect="dark"  placement="left-start">
-                            <div slot="content" class="item">{{scope.row.mintroduction}}</div>               
+                        <el-tooltip effect="dark" placement="left-start">
+                            <div slot="content" class="item">{{scope.row.mintroduction}}</div>
                             <div class="mintroduction">{{ scope.row.mintroduction}}</div>
                         </el-tooltip>
                     </template>
                 </el-table-column>
-                 <el-table-column label="是否上架" align="center" width="80">
+                <el-table-column label="是否上架" align="center" width="80">
                     <template slot-scope="scope">
-                        <el-switch v-model="scope.row.isRecent" @change="recentChange(scope.$index, scope.row)"></el-switch>
+                        <el-switch
+                            v-model="scope.row.isRecent"
+                            @change="recentChange(scope.$index, scope.row)"
+                        ></el-switch>
                     </template>
                 </el-table-column>
                 <el-table-column label="操作" width="120" align="center">
@@ -125,7 +124,7 @@
                     <!-- <el-input v-model="form.releasetime"></el-input> -->
                 </el-form-item>
                 <el-form-item label="影片时长" prop="mdurationform">
-                    <el-input v-model="form.mdurationform" >
+                    <el-input v-model="form.mdurationform">
                         <template slot="append">分钟</template>
                     </el-input>
                 </el-form-item>
@@ -159,32 +158,44 @@
 </template>
 
 <script>
-import { getMoviePagination, addFilm, getAllMovie,getAllMovieCount,updateMovieById,delMovieByid,getMovieByName,getMovieByNameCount,addRecentFilms,delRecentFilmsById, getAllRecentFilms } from '../../../api/index';
+import {
+    getMoviePagination,
+    addFilm,
+    getAllMovie,
+    getAllMovieCount,
+    updateMovieById,
+    delMovieByid,
+    getMovieByName,
+    getMovieByNameCount,
+    addRecentFilms,
+    delRecentFilmsById,
+    getAllRecentFilms
+} from '../../../api/index';
 import VueCropper from 'vue-cropperjs';
 export default {
     name: 'filmlibrary',
     data() {
         return {
             query: {
-                pageIndex: 1,  //当前页数
-                pageSize: 5,  //每页显示条目个数
-                name: null  //搜索的影片名字
+                pageIndex: 1, //当前页数
+                pageSize: 5, //每页显示条目个数
+                name: null //搜索的影片名字
             },
             isAdd: true, //是否点击添加按钮
             // imageUrl: '',
             tableData: [],
-            multipleSelection: [],   //多选
+            multipleSelection: [], //多选
             delList: [],
             editVisible: false, //添加、编辑弹窗是否显示
-            filmTotal: null,   //影片库数量
+            filmTotal: null, //影片库数量
             defaultSrc: require('../../../assets/img/addPic.png'),
-            cropImg: '',  //剪裁的图片
-            dialogVisible: false,  //剪裁
-            loading:false,  //加载
-            isSearch: false,  //是否点击搜索按钮
+            cropImg: '', //剪裁的图片
+            dialogVisible: false, //剪裁
+            loading: false, //加载
+            isSearch: false, //是否点击搜索按钮
             isRecent: false,
             form: {
-                midform:null, //影片id
+                midform: null, //影片id
                 mpictureform: '', //添加图片的展示图片
                 mnameform: null, //影片名
                 mtypeform: null, //影片类型
@@ -193,7 +204,7 @@ export default {
                 mdurationform: null, //影片时长
                 mintroductionform: null //影片简介
             },
-            idx: -1,   //影片库第几行
+            idx: -1, //影片库第几行
             id: -1,
             rules: {
                 mpictureform: [{ required: true, message: '请上传影片图片', trigger: 'blur' }],
@@ -209,17 +220,19 @@ export default {
     components: {
         VueCropper
     },
-    computed:{
+    computed: {
         //监听搜索框的影片名是否发生改变
-        watchSearchName(){ return this.query.name}
+        watchSearchName() {
+            return this.query.name;
+        }
     },
-    watch:{
-        watchSearchName(_new, _old){
-            if(this.isSearch === true){
-                this.isSearch = false
+    watch: {
+        watchSearchName(_new, _old) {
+            if (this.isSearch === true) {
+                this.isSearch = false;
                 this.getFilmCount();
                 this.getData();
-            }          
+            }
         }
     },
     created() {
@@ -231,83 +244,83 @@ export default {
         //影片是否上架
         recentChange(index, row) {
             //影片上架
-            if(row.isRecent){
-                addRecentFilms({mid:row.mid}).then(res => {
-                    if(res === true){
-                        this.$message.success("上架成功");
-                    }else{
-                        this.$message.success("上架失败");
-                        row.isRecent =false;
+            if (row.isRecent) {
+                addRecentFilms({ mid: row.mid }).then(res => {
+                    if (res === true) {
+                        this.$message.success('上架成功');
+                    } else {
+                        this.$message.success('上架失败');
+                        row.isRecent = false;
                     }
-                })
-            }else{  //影片下架
-                delRecentFilmsById({mid:row.mid}).then(res => {
-                     if(res === true){
-                        this.$message.success("下架成功");
-                    }else{
-                        this.$message.success("下架失败");
-                        row.isRecent =false;
+                });
+            } else {
+                //影片下架
+                delRecentFilmsById({ mid: row.mid }).then(res => {
+                    if (res === true) {
+                        this.$message.success('下架成功');
+                    } else {
+                        this.$message.success('下架失败');
+                        row.isRecent = false;
                     }
-                })
+                });
             }
         },
         //获取上架影片,初始化影片是否上架
         getAllRecent(tableData) {
             //给tableData添加isRecent属性
-            for(let item of tableData){
-                this.$set(item,'isRecent',false);
+            for (let item of tableData) {
+                this.$set(item, 'isRecent', false);
             }
             getAllRecentFilms().then(data => {
-                for(let resitem of data.body){
-                    for(let item of tableData){
-                        if(resitem.mid === item.mid)
-                            item.isRecent = true
+                for (let resitem of data.body) {
+                    for (let item of tableData) {
+                        if (resitem.mid === item.mid) item.isRecent = true;
                     }
                 }
-            })
+            });
         },
         //获取影片库数量
         getFilmCount() {
             getAllMovieCount().then(res => {
                 this.filmTotal = res;
-            })
+            });
         },
         // 获取影片库数据
         getData() {
-            let data={
-                pageIndex: this.query.pageSize*(this.query.pageIndex-1),
-                pageSize: this.query.pageSize  
-            }
+            let data = {
+                pageIndex: this.query.pageSize * (this.query.pageIndex - 1),
+                pageSize: this.query.pageSize
+            };
             getMoviePagination(data).then(res => {
                 if (res.code === 0) {
                     this.tableData = res.body;
-                    if(this.isAdd === true){
-                        this.getAllRecent(this.tableData)
-                    }                 
+                    if (this.isAdd === true) {
+                        this.getAllRecent(this.tableData);
+                    }
                     this.loading = false;
                 }
-            })
+            });
         },
         // 触发搜索按钮
         handleSearch() {
-            this.isSearch = true
-            let data={
-                pageIndex: this.query.pageSize*(this.query.pageIndex-1),
+            this.isSearch = true;
+            let data = {
+                pageIndex: this.query.pageSize * (this.query.pageIndex - 1),
                 pageSize: this.query.pageSize,
-                name: this.query.name  
-            }
+                name: this.query.name
+            };
             Promise.all([
                 //获取搜索影片的数量
-                getMovieByNameCount({name:this.query.name}),
+                getMovieByNameCount({ name: this.query.name }),
                 getMovieByName(data)
             ]).then(results => {
-                this.filmTotal = results[0]
-                if(results[1].code === 0){
+                this.filmTotal = results[0];
+                if (results[1].code === 0) {
                     this.tableData = results[1].body;
-                    this.getAllRecent(this.tableData)
+                    this.getAllRecent(this.tableData);
                     this.loading = false;
                 }
-            })
+            });
         },
         // 删除操作
         handleDelete(index, row) {
@@ -316,14 +329,14 @@ export default {
                 type: 'warning'
             })
                 .then(() => {
-                    delMovieByid({mid:row.mid}).then(res => {
-                        if(res === true){
+                    delMovieByid({ mid: row.mid }).then(res => {
+                        if (res === true) {
                             this.$message.success('删除成功');
                             // this.tableData.splice(index, 1);
                             this.filmTotal--;
-                            this.getData();                       
+                            this.getData();
                         }
-                    })                   
+                    });
                 })
                 .catch(() => {});
         },
@@ -337,7 +350,7 @@ export default {
             this.form.mdurationform = row.mduration;
             this.form.mintroductionform = row.mintroduction;
             this.form.releasetimeform = row.releasetime;
-            this.form.midform = row.mid
+            this.form.midform = row.mid;
             this.idx = index;
             this.isAdd = false;
             this.editVisible = true;
@@ -357,12 +370,12 @@ export default {
                         mid: this.form.midform
                     };
                     updateMovieById(data).then(res => {
-                        if(res === true){
+                        if (res === true) {
                             this.$message.success(`修改第 ${this.idx + 1} 行成功`);
                             this.$set(this.tableData, this.idx, data);
                         }
-                        this.editVisible = false;      
-                    })                                     
+                        this.editVisible = false;
+                    });
                 } else {
                     return;
                 }
@@ -396,7 +409,7 @@ export default {
                     };
                     addFilm(data).then(res => {
                         //当数据库插入数据成功时，界面刷新数据
-                        if(res === true){
+                        if (res === true) {
                             this.filmTotal++;
                             this.getData();
                         }
@@ -411,11 +424,11 @@ export default {
         handlePageChange(val) {
             this.loading = true;
             this.$set(this.query, 'pageIndex', val);
-            if(this.isSearch === true){
-                this.handleSearch()
-            }else{
+            if (this.isSearch === true) {
+                this.handleSearch();
+            } else {
                 this.getData();
-            }          
+            }
         },
         setImage(e) {
             const file = e.target.files[0];
@@ -442,7 +455,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.el-tooltip__popper{
+.el-tooltip__popper {
     width: 100px;
 }
 .handle-box {
@@ -529,7 +542,7 @@ export default {
     opacity: 0;
     cursor: pointer;
 }
-.mintroduction{
+.mintroduction {
     display: -webkit-box;
     overflow: hidden; /*超出宽度部分隐藏*/
     text-overflow: ellipsis; /*超出部分以点号代替*/
@@ -544,5 +557,4 @@ export default {
     width: 400px;
     text-align: center;
 }
-
 </style>

@@ -239,3 +239,26 @@ export function GetFilmReviewByMid(data) {
         params: data
     });
 }
+//获取所有影片分数
+export function GetFilmScore() {
+    return request({
+        url: '/manager/GetFilmScore',
+        method: 'get'
+    });
+}
+//改变影片分数
+export function UpdateFilmScore(data) {
+    return request({
+        url: '/manager/UpdateFilmScore',
+        method: 'post',
+        data
+    });
+}
+//根据影片id获取该影片所有评价
+export function GetFilmReviewInfoById(data) {
+    return request({
+        url: '/manager/GetFilmReviewInfoById',
+        method: 'get',
+        params: data
+    });
+}

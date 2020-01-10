@@ -37,7 +37,7 @@
 </template>
 <script>
 import returnH from '../../common/return.vue';
-import { GetFilmById, AddFilmReview } from '../../../api/index';
+import { GetFilmById, AddFilmReview, UpdateFilmScore, GetFilmReviewByMid } from '../../../api/index';
 import Vue from 'vue';
 import { Rate, Divider, Field, Button, Toast } from 'vant';
 Vue.use(Rate);
@@ -103,15 +103,35 @@ export default {
                 evaluate: this.message
             };
             AddFilmReview(data).then(res => {
-                console.log(res);
                 if (res) {
                     Toast.success('发布成功');
-                    this.$router.go(-1);
+                    this.getFilmScore();
                 } else {
                     Toast.success('发布失败');
                 }
             });
-            console.log(data);
+        },
+        /**
+         * 获取影片分数
+         */
+        getFilmScore() {
+            GetFilmReviewByMid({ mid: this.mid }).then(res => {
+                if (res.code === 0) {
+                    let sum = 0;
+                    res.body.forEach(element => {
+                        sum += element;
+                    });
+                    //修改评论分数
+                    let data = {
+                        mid: Number.parseInt(this.mid),
+                        score: Number.parseFloat((sum / res.body.length).toFixed(1))
+                    };
+                    UpdateFilmScore(data);
+                } else {
+                    return;
+                }
+                console.log(this.film);
+            });
         }
     }
 };

@@ -14,7 +14,7 @@
                 <div class="text">
                     <div class="item">{{film?film.mname:''}}</div>
                     <div class="score">
-                        <span class="score-film">{{film?film.score:''}}分</span>
+                        <span class="score-film">{{film?film.score:" "}}分</span>
                     </div>
                     <div class="mtype">{{film?film.mtype:''}}</div>
                     <div class="mtype">{{film?film.mcountry:''}} / {{film?film.mduration:''}}分钟</div>
@@ -85,16 +85,16 @@ export default {
             mid: this.$route.query.filmId // 选择的影片id
         };
     },
+    watch: {},
     created() {
         //获取点击的电影的信息
         GetFilmById({ mid: this.mid }).then(res => {
             if (res.code === 0) {
                 this.film = res.body;
+                console.log(this.film);
             }
         });
         this.getExclusivepieceData();
-        this.getFilmScore();
-        console.log(this.mid);
     },
     mounted() {},
     methods: {
@@ -108,7 +108,6 @@ export default {
                     } else {
                         this.exclusivepieceData = null;
                     }
-                    console.log(this.exclusivepieceData);
                 } else {
                     return;
                 }
@@ -116,7 +115,7 @@ export default {
         },
         //获取电影详情介绍
         filmIntroduce() {
-            this.$router.push('/filmIntroduce');
+            this.$router.push({ path: '/filmIntroduce', query: { filmId: this.mid } });
         },
         //想看
         wantToSee() {
@@ -126,23 +125,24 @@ export default {
         score() {
             console.log('评分');
             this.$router.push({ path: '/filmscore', query: { filmId: this.mid } });
-        },
+        }
         /**
          * 获取影片分数
          */
-        getFilmScore() {
-            GetFilmReviewByMid({ mid: this.mid }).then(res => {
-                if (res.code === 0) {
-                    let sum = 0;
-                    res.body.forEach(element => {
-                        sum += element;
-                    });
-                    this.film.score = (sum / res.body.length).toFixed(1);
-                } else {
-                    this.film.score = 0;
-                }
-            });
-        }
+        // getFilmScore() {
+        //     GetFilmReviewByMid({ mid: this.mid }).then(res => {
+        //         if (res.code === 0) {
+        //             let sum = 0;
+        //             res.body.forEach(element => {
+        //                 sum += element;
+        //             });
+        //             this.film.score = (sum / res.body.length).toFixed(1);
+        //         } else {
+        //             this.film.score = 1;
+        //         }
+        //         console.log(this.film);
+        //     });
+        // }
     }
 };
 </script>

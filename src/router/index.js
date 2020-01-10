@@ -105,25 +105,24 @@ export default new Router({
                 },
                 {
                     path: '/filmlibrary',
-                    component: () => import ('../components/page/filmmanagement/Filmlibrary.vue'),
-                    meta: {title: '影片库'}
+                    component: () => import('../components/page/filmmanagement/Filmlibrary.vue'),
+                    meta: { title: '影片库' }
                 },
                 {
                     path: '/recentfilms',
-                    component: () => import ('../components/page/filmmanagement/RecentFilms.vue'),
-                    meta: {title: '近期影片'}
+                    component: () => import('../components/page/filmmanagement/RecentFilms.vue'),
+                    meta: { title: '近期影片' }
                 },
                 {
                     path: '/projectionhallmanager',
-                    component: () => import ('../components/page/projectionhall/ProjectionHallManager.vue'),
-                    meta: {title: '放映厅管理'}
+                    component: () => import('../components/page/projectionhall/ProjectionHallManager.vue'),
+                    meta: { title: '放映厅管理' }
                 },
                 {
                     path: '/scenearrange',
-                    component: () => import ('../components/page/projectionhall/SceneArrange.vue'),
-                    meta: {title: '场次安排'}
-                },
-
+                    component: () => import('../components/page/projectionhall/SceneArrange.vue'),
+                    meta: { title: '场次安排' }
+                }
             ]
         },
         {
@@ -154,6 +153,6 @@ export default new Router({
             path: '/filmscore',
             component: () => import(/* webpackChunkName: "login" */ '../components/page/user/FilmScore.vue'),
             meta: { title: '评分' }
-        },
+        }
     ]
 });
