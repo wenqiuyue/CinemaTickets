@@ -262,3 +262,27 @@ export function GetFilmReviewInfoById(data) {
         params: data
     });
 }
+//添加想看的影片
+export function AddWantSeeFilm(data) {
+    return request({
+        url: '/manager/AddWantSeeFilm',
+        method: 'post',
+        data
+    });
+}
+//查询添加想看的影片是否已添加
+export function IsAddWantSeeFilm(data) {
+    return request({
+        url: '/manager/IsAddWantSeeFilm',
+        method: 'post',
+        data
+    });
+}
+//根据排片id多表获取排片信息
+export function GetExclusivepieceInfoByEid(data) {
+    return request({
+        url: '/manager/GetExclusivepieceInfoByEid',
+        method: 'get',
+        params: data
+    });
+}

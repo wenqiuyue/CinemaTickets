@@ -1,33 +1,33 @@
 import Vue from 'vue';
 import App from './App.vue';
 //使用axios进行ajax请求  首先npm下载 npm install --save axios vue-axios 然后导包
-import axios from 'axios'
-import VueAxios from 'vue-axios'
-Vue.use(VueAxios,axios);
+import axios from 'axios';
+import VueAxios from 'vue-axios';
+Vue.use(VueAxios, axios);
 import router from './router';
 import VueRouter from 'vue-router';
-const routerPush = VueRouter.prototype.push
+const routerPush = VueRouter.prototype.push;
 VueRouter.prototype.push = function push(location) {
-  return routerPush.call(this, location).catch(error=> error)
-}
+    return routerPush.call(this, location).catch(error => error);
+};
 //导入格式化时间插件  首先 npm i moment -S 然后导入
-import moment from 'moment'
+import moment from 'moment';
 //定义全局过滤器
-Vue.filter('dateFormat',function (dataStr,pattern="YYYY-MM-DD HH:mm") {
+Vue.filter('dateFormat', function(dataStr, pattern = 'YYYY-MM-DD HH:mm') {
     return moment(dataStr).format(pattern);
-})
-Vue.filter('timeFormat',function (dataStr,pattern="HH:mm") {
+});
+Vue.filter('timeFormat', function(dataStr, pattern = 'HH:mm') {
     return moment(dataStr).format(pattern);
-})
+});
 import ElementUI from 'element-ui';
 import VueI18n from 'vue-i18n';
 import { messages } from './components/common/i18n';
 import 'element-ui/lib/theme-chalk/index.css'; // 默认主题
 // import './assets/css/theme-green/index.css'; // 浅绿色主题
 import './assets/css/icon.css';
+import './assets/icon/iconfont.css';
 import './components/common/directives';
 import 'babel-polyfill';
-
 
 Vue.config.productionTip = false;
 Vue.use(VueI18n);

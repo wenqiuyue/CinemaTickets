@@ -1,0 +1,16 @@
+{
+  "id": "1610842",
+  "name": "购票系统",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "7463983",
+      "name": "座位",
+      "font_class": "el-icon-zuowei",
+      "unicode": "e62f",
+      "unicode_decimal": 58927
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 <template>
     <div>
         <return-h :title="film?film.mname:''"></return-h>
-        <div class="head">
+        <div class="head" v-if="film">
             <van-image
                 width="100%"
                 height="13rem"
@@ -25,9 +25,9 @@
                     <el-button
                         type="info"
                         class="button"
-                        icon="el-icon-lx-likefill"
+                        :icon="film.isWant?'el-icon-success':'el-icon-lx-likefill'"
                         @click.stop="wantToSee"
-                    >想看</el-button>
+                    >{{film.isWant?'已想看':'想看'}}</el-button>
                     <el-button
                         type="info"
                         class="button"
@@ -57,7 +57,7 @@
                     <span class="tag">折扣卡首单</span>
                     <span class="tag-price">￥{{item.mprice-4}}</span>
                 </div>
-                <div class="buy">
+                <div class="buy" @click="seat(item.eid)">
                     <span class="tag-buy">购买</span>
                 </div>
             </div>
@@ -67,11 +67,13 @@
 </template>
 <script>
 import returnH from '../../common/return.vue';
-import { GetFilmById, GetExclusivePieceById, GetFilmReviewByMid } from '../../../api/index';
+import { GetFilmById, GetExclusivePieceById, GetFilmReviewByMid, AddWantSeeFilm, IsAddWantSeeFilm } from '../../../api/index';
 import Vue from 'vue';
-import { Image, NoticeBar } from 'vant';
-Vue.use(Image);
-Vue.use(NoticeBar);
+import { Image, NoticeBar, Toast } from 'vant';
+import { log } from 'util';
+Vue.use(Image)
+    .use(NoticeBar)
+    .use(Toast);
 export default {
     name: 'filmexclusivepiece',
     components: {
@@ -82,16 +84,29 @@ export default {
             text: '新视界，新天地，心享受! 高保真优质视听效果，给你身临其境的感觉。',
             film: null, //选择的电影数据
             exclusivepieceData: null, //排片数据
-            mid: this.$route.query.filmId // 选择的影片id
+            mid: this.$route.query.filmId, // 选择的影片id
+            userinfo: null
         };
     },
     watch: {},
     created() {
+        this.userinfo = localStorage.getItem('USER_INFO');
+        if (this.userinfo) {
+            this.userinfo = JSON.parse(this.userinfo);
+        }
         //获取点击的电影的信息
-        GetFilmById({ mid: this.mid }).then(res => {
-            if (res.code === 0) {
-                this.film = res.body;
-                console.log(this.film);
+        const data = {
+            mid: this.mid,
+            uid: this.userinfo.uid
+        };
+        Promise.all([GetFilmById({ mid: this.mid }), IsAddWantSeeFilm(data)]).then(res => {
+            if (res[0].code === 0) {
+                if (res[1] === true) {
+                    res[0].body.isWant = true;
+                } else {
+                    res[0].body.isWant = false;
+                }
+                this.film = res[0].body;
             }
         });
         this.getExclusivepieceData();
@@ -119,13 +134,25 @@ export default {
         },
         //想看
         wantToSee() {
-            console.log('想看');
+            const data = {
+                mid: this.mid,
+                uid: this.userinfo.uid
+            };
+            AddWantSeeFilm(data).then(res => {
+                if (res.code === 1001) {
+                    Toast(res.message);
+                } else if (res.code === 1002) {
+                    this.film.isWant = true;
+                } else {
+                    Toast(res.message);
+                }
+            });
         },
         //评分
         score() {
             console.log('评分');
             this.$router.push({ path: '/filmscore', query: { filmId: this.mid } });
-        }
+        },
         /**
          * 获取影片分数
          */
@@ -143,6 +170,13 @@ export default {
         //         console.log(this.film);
         //     });
         // }
+        /**
+         * 在线选座
+         */
+        seat(eid) {
+            this.$router.push({ path: '/seatselection', query: { eid: eid } });
+            console.log(eid);
+        }
     }
 };
 </script>

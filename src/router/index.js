@@ -153,6 +153,11 @@ export default new Router({
             path: '/filmscore',
             component: () => import(/* webpackChunkName: "login" */ '../components/page/user/FilmScore.vue'),
             meta: { title: '评分' }
+        },
+        {
+            path: '/seatselection',
+            component: () => import(/* webpackChunkName: "login" */ '../components/page/user/SeatSelection.vue'),
+            meta: { title: '在线选座' }
         }
     ]
 });
