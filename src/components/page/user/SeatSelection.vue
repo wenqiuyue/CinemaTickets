@@ -11,13 +11,22 @@
             <div class="seat-title">
                 <span class="pid">{{filmData.pid}}号厅</span>
             </div>
-            <table class="scoreTable">
-                <tr v-for="(item,index) in 9">
-                    <td v-for="(item,index) in 9">
-                        <span class="icon-el-icon-zuowei"></span>
-                    </td>
-                </tr>
-            </table>
+            <div class="seat-table">
+                <table class="scoreTable">
+                    <tr v-for="(itemr,index) in filmData.projectionHall.mrow" class="seat-tr">
+                        <span class="index">{{index+1}}</span>
+                        <td
+                            v-for="(itemc,index1) in filmData.projectionHall.mcolumn"
+                            class="seat-td"
+                        >
+                            <span
+                                :class="`icon-el-icon-zuowei zuowei${itemr}${itemc}`"
+                                @click="seatSelect(itemr,itemc)"
+                            ></span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
     </div>
 </template>
@@ -42,6 +51,11 @@ export default {
                 this.filmData = res.body;
             }
         });
+    },
+    methods: {
+        seatSelect(row, column) {
+            console.log(row, column);
+        }
     }
 };
 </script>
@@ -60,6 +74,7 @@ export default {
 .seat {
     background: rgba($color: #f0f0f0, $alpha: 0.4);
     padding: 0px 5px;
+    text-align: center;
     .seat-title {
         width: 80px;
         height: 0;
@@ -75,6 +90,23 @@ export default {
             position: absolute;
             top: -20px;
             left: 37px;
+        }
+    }
+    .seat-table {
+        width: 100%;
+        overflow: scroll;
+        .scoreTable {
+            tr {
+                height: 30px;
+            }
+            td {
+                .icon-el-icon-zuowei {
+                    margin-left: 3px;
+                }
+            }
+            .index {
+                font-size: 14px;
+            }
         }
     }
 }
