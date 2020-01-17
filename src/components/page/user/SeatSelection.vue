@@ -21,6 +21,7 @@
                         >
                             <span
                                 :class="`icon-el-icon-zuowei zuowei${itemr}${itemc}`"
+                                :style="selData.indexOf(`${itemr}-${itemc}`)!==-1 ? 'color:#6BBD01' : ''"
                                 @click="seatSelect(itemr,itemc)"
                             ></span>
                         </td>
@@ -31,8 +32,11 @@
     </div>
 </template>
 <script>
+import Vue from 'vue';
 import returnH from '../../common/return.vue';
 import { GetExclusivepieceInfoByEid } from '../../../api/index';
+import { Toast } from 'vant';
+Vue.use(Toast);
 export default {
     name: 'seatselection',
     components: {
@@ -41,6 +45,9 @@ export default {
     data() {
         return {
             eid: this.$route.query.eid,
+            row: null, //选择的座位行
+            column: null, //选择的座位列
+            selData: [],
             filmData: null //影片数据
         };
     },
@@ -55,6 +62,22 @@ export default {
     methods: {
         seatSelect(row, column) {
             console.log(row, column);
+            // this.row = row;
+            // this.column = column;
+            const isSel = this.selData.indexOf(`${row}-${column}`);
+            if (isSel === -1) {
+                if (this.selData.length < 5) {
+                    this.selData.push(`${row}-${column}`);
+                } else {
+                    Toast('一次最多选择5个座位');
+                }
+            } else {
+                this.selData.forEach((ele, index) => {
+                    if (ele === `${row}-${column}`) {
+                        this.selData.splice(index, 1);
+                    }
+                });
+            }
         }
     }
 };
@@ -73,7 +96,7 @@ export default {
 }
 .seat {
     background: rgba($color: #f0f0f0, $alpha: 0.4);
-    padding: 0px 5px;
+    padding: 0px 5px 30px 5px;
     text-align: center;
     .seat-title {
         width: 80px;
