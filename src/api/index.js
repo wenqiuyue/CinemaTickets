@@ -286,3 +286,11 @@ export function GetExclusivepieceInfoByEid(data) {
         params: data
     });
 }
+//插入订单
+export function AddOrder(data) {
+    return request({
+        url: '/manager/AddOrder',
+        method: 'post',
+        data
+    });
+}
