@@ -294,3 +294,11 @@ export function AddOrder(data) {
         data
     });
 }
+//获取某场次已被选的座位
+export function GetSeatselectionByEid(data) {
+    return request({
+        url: '/manager/GetSeatselectionByEid',
+        method: 'get',
+        params: data
+    });
+}

@@ -158,6 +158,11 @@ export default new Router({
             path: '/seatselection',
             component: () => import(/* webpackChunkName: "login" */ '../components/page/user/SeatSelection.vue'),
             meta: { title: '在线选座' }
+        },
+        {
+            path: '/order',
+            component: () => import(/* webpackChunkName: "login" */ '../components/page/user/Order.vue'),
+            meta: { title: '生成订单' }
         }
     ]
 });

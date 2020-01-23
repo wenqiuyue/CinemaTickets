@@ -21,7 +21,7 @@
                         >
                             <span
                                 :class="`icon-el-icon-zuowei zuowei${itemr}${itemc}`"
-                                :style="selData.indexOf(`${itemr}排${itemc}座`)!==-1 ? 'color:#6BBD01' : ''"
+                                :style="alreadySelData.indexOf(`${itemr}排${itemc}座`)!==-1?'color:red':selData.indexOf(`${itemr}排${itemc}座`)!==-1 ? 'color:#6BBD01' :''"
                                 @click="seatSelect(itemr,itemc)"
                             ></span>
                         </td>
@@ -72,9 +72,10 @@
 import Vue from 'vue';
 import returnH from '../../common/return.vue';
 import * as api from '../../../api/index';
-import { Toast, Button, Tag } from 'vant';
+import { Toast, Button, Tag, Dialog } from 'vant';
 Vue.use(Toast)
     .use(Button)
+    .use(Dialog)
     .use(Tag);
 export default {
     name: 'seatselection',
@@ -87,6 +88,7 @@ export default {
             row: null, //选择的座位行
             column: null, //选择的座位列
             selData: [],
+            alreadySelData: [],
             filmData: null //影片数据
         };
     },
@@ -97,25 +99,28 @@ export default {
                 this.filmData = res.body;
             }
         });
+        this.getAlreadySeat();
     },
     methods: {
         seatSelect(row, column) {
             console.log(row, column);
-            // this.row = row;
-            // this.column = column;
-            const isSel = this.selData.indexOf(`${row}排${column}座`);
-            if (isSel === -1) {
-                if (this.selData.length < 4) {
-                    this.selData.push(`${row}排${column}座`);
+            if (this.alreadySelData.indexOf(`${row}排${column}座`) === -1) {
+                const isSel = this.selData.indexOf(`${row}排${column}座`);
+                if (isSel === -1) {
+                    if (this.selData.length < 4) {
+                        this.selData.push(`${row}排${column}座`);
+                    } else {
+                        Toast('一次最多选择4个座位');
+                    }
                 } else {
-                    Toast('一次最多选择4个座位');
+                    this.selData.forEach((ele, index) => {
+                        if (ele === `${row}排${column}座`) {
+                            this.selData.splice(index, 1);
+                        }
+                    });
                 }
             } else {
-                this.selData.forEach((ele, index) => {
-                    if (ele === `${row}排${column}座`) {
-                        this.selData.splice(index, 1);
-                    }
-                });
+                return;
             }
         },
         /**
@@ -132,28 +137,56 @@ export default {
          * 确认选座
          */
         confirmSeat() {
-            let userinfo = localStorage.getItem('USER_INFO');
-            if (userinfo) {
-                userinfo = JSON.parse(userinfo);
-            }
-            let mySeat = [];
+            Dialog.confirm({
+                title: '标题',
+                message: '您确定要生成订单吗？'
+            })
+                .then(() => {
+                    let userinfo = localStorage.getItem('USER_INFO');
+                    if (userinfo) {
+                        userinfo = JSON.parse(userinfo);
+                    }
+                    let mySeat = [];
 
-            this.selData.forEach(ele => {
-                const seat = ele.split('排').map(s => {
-                    return Number.parseInt(s);
+                    this.selData.forEach(ele => {
+                        const seat = ele.split('排').map(s => {
+                            return Number.parseInt(s);
+                        });
+                        mySeat.push({ rowsel: seat[0], columnsel: seat[1] });
+                    });
+                    const data = {
+                        eid: Number.parseInt(this.eid),
+                        uid: userinfo.uid,
+                        oprice: JSON.stringify(this.filmData.mprice * this.selData.length),
+                        seatSelectionList: mySeat
+                    };
+                    api.AddOrder(data).then(res => {
+                        console.log(res);
+                        if (res.code === 0) {
+                            // this.getAlreadySeat();
+                            // this.selData = [];
+                            this.$router.push({ path: '/order', query: { oid: res.body } });
+                        } else {
+                            Toast('订单生成失败，请重新操作');
+                        }
+                    });
+                })
+                .catch(() => {
+                    Toast('取消生成订单');
                 });
-                mySeat.push({ rowsel: seat[0], columnsel: seat[1] });
+        },
+        /**
+         * 获取该场次已被选择的座位
+         */
+        getAlreadySeat() {
+            api.GetSeatselectionByEid({ eid: this.eid }).then(res => {
+                if (res.code === 0) {
+                    res.body.forEach(ele => {
+                        this.alreadySelData.push(`${ele.rowsel}排${ele.columnsel}座`);
+                    });
+                    console.log(this.alreadySelData);
+                }
             });
-            const data = {
-                eid: Number.parseInt(this.eid),
-                uid: userinfo.uid,
-                oprice: JSON.stringify(this.filmData.mprice * this.selData.length),
-                seatSelectionList: mySeat
-            };
-            api.AddOrder(data).then(res => {
-                console.log(res);
-            });
-            console.log(data);
         }
     }
 };
@@ -231,7 +264,7 @@ export default {
             padding-bottom: 15px;
         }
         .van-tag {
-            margin: 0 3px;
+            margin: 0 2px;
             span {
                 font-size: 14px;
                 color: #333;
