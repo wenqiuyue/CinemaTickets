@@ -1,34 +1,28 @@
 <template>
     <div>
         <return-h title="档单详情"></return-h>
-        <div class="body">
-            <div class="state"></div>
-            <div class="order-num"><label>订单编号：</label>{{ oid }}</div>
+        <div class="body" v-if="orderInfo">
+            <div class="order-info">
+                <div>{{orderInfo.film.mname}}</div>
+            </div>
+            <div class="order-num">
+                <label>订单编号：</label>
+                {{ oid }}
+            </div>
             <div class="qrcode-body">
                 <div class="qrcode-tips">*凭订单编号或二维码前去电影院取票</div>
                 <div class="qrcode" ref="qrCodeUrl"></div>
-            </div>
-            <div class="order-info">
-                <van-card num="2" price="2.00" desc="描述信息" title="商品标题" thumb="https://img.yzcdn.cn/vant/t-thirt.jpg">
-                    <div slot="tags">
-                        <van-tag plain type="danger">标签</van-tag>
-                        <van-tag plain type="danger">标签</van-tag>
-                    </div>
-                    <div slot="footer">
-                        <van-button size="mini">按钮</van-button>
-                        <van-button size="mini">按钮</van-button>
-                    </div>
-                </van-card>
             </div>
         </div>
     </div>
 </template>
 <script>
 import returnH from '../../common/return.vue';
-import QRCode from 'qrcodejs2';
 import Vue from 'vue';
-import { Card } from 'vant';
-Vue.use(Card);
+import { Card, Toast } from 'vant';
+Vue.use(Card).use(Toast);
+import * as api from '../../../api/index';
+import QRCode from 'qrcodejs2';
 export default {
     name: 'order',
     components: {
@@ -36,13 +30,22 @@ export default {
     },
     data() {
         return {
-            oid: this.$route.query.oid
+            oid: this.$route.query.oid, //订单编号
+            orderInfo: null //订单信息
         };
     },
     mounted() {
-        this.creatQrCode();
+        setTimeout(() => {
+            this.creatQrCode();
+        }, 1000);
+    },
+    created() {
+        this.getOrderInfo();
     },
     methods: {
+        /**
+         * 根据订单编号生成二维码
+         */
         creatQrCode() {
             var qrcode = new QRCode(this.$refs.qrCodeUrl, {
                 text: this.oid,
@@ -52,6 +55,19 @@ export default {
                 colorLight: '#ffffff',
                 correctLevel: QRCode.CorrectLevel.H
             });
+        },
+        /**
+         * 根据订单编号获取订单详情
+         */
+        getOrderInfo() {
+            api.GetOrderInfo({ oid: this.oid }).then(res => {
+                console.log(res);
+                if (res.code === 0) {
+                    this.orderInfo = res.body;
+                } else {
+                    Toast(res.message);
+                }
+            });
         }
     }
 };
@@ -60,9 +76,15 @@ export default {
 .body {
     padding: 10px 0;
     background: #f8f8f8;
+    .order-info {
+        background: #fff;
+        padding: 5px 10px;
+        text-align: center;
+    }
     .order-num {
         background: #fff;
         padding: 15px 10px;
+        margin-top: 5px;
         label {
             color: #a4a4a4;
         }
@@ -80,13 +102,6 @@ export default {
             display: flex;
             justify-content: center;
             margin-top: 10px;
-        }
-    }
-    .order-info {
-        background: #fff;
-        margin-top: 5px;
-        .van-card {
-            background: #fff;
         }
     }
 }

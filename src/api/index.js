@@ -302,3 +302,11 @@ export function GetSeatselectionByEid(data) {
         params: data
     });
 }
+//根据订单编号获取订单信息
+export function GetOrderInfo(data) {
+    return request({
+        url: '/manager/GetOrderInfo',
+        method: 'get',
+        params: data
+    });
+}
