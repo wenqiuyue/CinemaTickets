@@ -28,7 +28,10 @@ import './assets/css/icon.css';
 import './assets/icon/iconfont.css';
 import './components/common/directives';
 import 'babel-polyfill';
-
+import svgIcon from './components/common/svg-icon.vue';
+import returnH from './components/common/return.vue';
+Vue.component('svgIcon', svgIcon);
+Vue.component('returnH', returnH);
 Vue.config.productionTip = false;
 Vue.use(VueI18n);
 Vue.use(ElementUI, {

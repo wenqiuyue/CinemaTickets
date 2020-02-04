@@ -163,6 +163,31 @@ export default new Router({
             path: '/order',
             component: () => import(/* webpackChunkName: "login" */ '../components/page/user/Order.vue'),
             meta: { title: '生成订单' }
+        },
+        {
+            path: '/my',
+            component: () => import(/* webpackChunkName: "login" */ '../components/page/my/My.vue'),
+            meta: { title: '我的' }
+        },
+        {
+            path: '/setinfo',
+            component: () => import(/* webpackChunkName: "login" */ '../components/page/my/SetInfo.vue'),
+            meta: { title: '我的信息修改' }
+        },
+        {
+            path: '/myorder',
+            component: () => import(/* webpackChunkName: "login" */ '../components/page/my/MyOrder.vue'),
+            meta: { title: '我的订单' }
+        },
+        {
+            path: '/myfilm',
+            component: () => import(/* webpackChunkName: "login" */ '../components/page/my/MyFilm.vue'),
+            meta: { title: '想看的电影' }
+        },
+        {
+            path: '/setsafe',
+            component: () => import(/* webpackChunkName: "login" */ '../components/page/my/SetSafe.vue'),
+            meta: { title: '安全设置' }
         }
     ]
 });

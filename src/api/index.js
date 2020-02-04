@@ -310,3 +310,27 @@ export function GetOrderInfo(data) {
         params: data
     });
 }
+//根据用户id查询用户姓名和头像
+export function GetNameAndPicById(data) {
+    return request({
+        url: '/manager/GetNameAndPicById',
+        method: 'get',
+        params: data
+    });
+}
+//修改用户头像和用户名
+export function UpdatePicAndName(data) {
+    return request({
+        url: '/manager/UpdatePicAndName',
+        method: 'post',
+        data
+    });
+}
+//查询想看的电影
+export function GetMyLikeFilm(data) {
+    return request({
+        url: '/manager/GetMyLikeFilm',
+        method: 'get',
+        params: data
+    });
+}
