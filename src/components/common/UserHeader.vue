@@ -1,8 +1,8 @@
 <template>
     <div>
-        <van-tabbar v-model="active">
-            <van-tabbar-item replace to="/filmIndex" icon="home-o" name="home">首页</van-tabbar-item>
-            <van-tabbar-item replace to="/my" icon="user-circle-o" name="my">我的</van-tabbar-item>
+        <van-tabbar v-model="active" @change="change">
+            <van-tabbar-item icon="home-o">首页</van-tabbar-item>
+            <van-tabbar-item icon="user-circle-o">我的</van-tabbar-item>
         </van-tabbar>
     </div>
 </template>
@@ -14,10 +14,20 @@ export default {
     name: 'userheader',
     data() {
         return {
-            active: 'home'
+            active: 0
         };
     },
-    methods: {}
+    methods: {
+        change(active) {
+            this.active = active;
+            if (this.active === 0) {
+                this.$router.push('/filmIndex');
+            } else {
+                this.$router.push('/my');
+            }
+            console.log(active);
+        }
+    }
 };
 </script>
 <style lang="scss" scoped>

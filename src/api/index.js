@@ -334,3 +334,19 @@ export function GetMyLikeFilm(data) {
         params: data
     });
 }
+//修改密码
+export function UpdatePassword(data) {
+    return request({
+        url: '/manager/UpdatePassword',
+        method: 'post',
+        data
+    });
+}
+//根据用户id获取订单列表
+export function GetUserOrderList(data) {
+    return request({
+        url: '/manager/GetUserOrderList',
+        method: 'get',
+        params: data
+    });
+}

@@ -91,9 +91,9 @@ export default {
         this.getAllPopularRecentFilmsData();
     },
     mounted() {
-        DelExclusivepieceNotTody().then(res => {
-            console.log('删除了' + res + '条记录');
-        });
+        // DelExclusivepieceNotTody().then(res => {
+        //     console.log('删除了' + res + '条记录');
+        // });
     },
     methods: {
         //导航条

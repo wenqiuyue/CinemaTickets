@@ -26,32 +26,22 @@
                 header-cell-class-name="table-header"
             >
                 <el-table-column label="序号" width="55" align="center">
-                    <template slot-scope="scope">
-                        {{ scope.$index+1 }}
-                    </template>
+                    <template slot-scope="scope">{{ scope.$index+1 }}</template>
                 </el-table-column>
                 <el-table-column prop="film.mname" label="影片名" align="center"></el-table-column>
                 <el-table-column prop="mlanguage" label="语言" align="center" width="120"></el-table-column>
                 <el-table-column prop="meffect" label="效果" align="center" width="120"></el-table-column>
                 <el-table-column prop="timebegin" label="开场时间" align="center">
-                    <template slot-scope="scope">
-                        {{ scope.row.timebegin | dateFormat }}
-                    </template>
+                    <template slot-scope="scope">{{ scope.row.timebegin | dateFormat }}</template>
                 </el-table-column>
                 <el-table-column prop="timeend" label="散场时间" align="center">
-                    <template slot-scope="scope">
-                        {{ scope.row.timeend }}
-                    </template>
+                    <template slot-scope="scope">{{ scope.row.timeend }}</template>
                 </el-table-column>
-                <el-table-column prop="pid" label="放映厅" align="center"  width="120">
-                    <template slot-scope="scope">
-                        {{ scope.row.pid }}号厅
-                    </template>
+                <el-table-column prop="pid" label="放映厅" align="center" width="120">
+                    <template slot-scope="scope">{{ scope.row.pid }}号厅</template>
                 </el-table-column>
                 <el-table-column prop="mprice" label="价格" align="center" width="120">
-                    <template slot-scope="scope">
-                        ￥{{ scope.row.mprice }}
-                    </template>
+                    <template slot-scope="scope">￥{{ scope.row.mprice }}</template>
                 </el-table-column>
                 <el-table-column label="操作" width="180" align="center">
                     <template slot-scope="scope">
@@ -84,35 +74,29 @@
         <el-dialog :title="isAdd?'添加':'编辑'" :visible.sync="editVisible" width="40%">
             <el-form ref="form" :model="form" label-width="70px">
                 <el-form-item label="影片">
-                    <el-select v-model="value" value-key="mid" placeholder="请选择" @change="changeFilm">
+                    <el-select
+                        v-model="value"
+                        value-key="mid"
+                        placeholder="请选择"
+                        @change="changeFilm"
+                    >
                         <el-option
                             v-for="item in filmsData"
                             :key="item.mid"
                             :label="item.mname"
                             :value="item"
-                            :disabled="item.disabled">
-                        </el-option>
+                            :disabled="item.disabled"
+                        ></el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="语言">
                     <el-select v-model="selLanguage" value-key="pid" placeholder="请选择">
-                        <el-option
-                            v-for="item in language"
-                            :key="item"
-                            :label="item"
-                            :value="item">
-                        </el-option>
+                        <el-option v-for="item in language" :key="item" :label="item" :value="item"></el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="效果">
                     <el-select v-model="seleffect" value-key="pid" placeholder="请选择">
-                        <el-option
-                            v-for="item in effect"
-                            :key="item"
-                            :label="item"
-                            :value="item"
-                        >
-                        </el-option>
+                        <el-option v-for="item in effect" :key="item" :label="item" :value="item"></el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="时间">
@@ -123,16 +107,15 @@
                             selectableRange: '00:00:00 - 23:00:00'
                             }"
                             placeholder="开场时间"
-                            @change="handleTimeBegin">
-                        </el-time-picker>
-                        至
+                            @change="handleTimeBegin"
+                        ></el-time-picker>至
                         <el-time-picker
                             arrow-control
                             v-model="pickerTimeEnd"
                             readonly
-                            placeholder="结束时间">
-                        </el-time-picker>
-                    </div>                 
+                            placeholder="结束时间"
+                        ></el-time-picker>
+                    </div>
                 </el-form-item>
                 <el-form-item label="放映厅">
                     <el-select v-model="valueProjectionHall" value-key="pid" placeholder="请选择">
@@ -141,9 +124,8 @@
                             :key="item.pid"
                             :label="item.pid"
                             :value="item.pid"
-                            :disabled="item.disabled">
-                            {{item.pid}}号厅
-                        </el-option>
+                            :disabled="item.disabled"
+                        >{{item.pid}}号厅</el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="价格" prop="price">
@@ -158,103 +140,129 @@
     </div>
 </template>
 <script>
-import { DelExclusivepieceNotTody,fetchData,getAllRecentFilms,getAllProjectionHall,getExclusivepiece,addExclusivePiece,getExclusivepieceInfo,gettExclusivepieceByName,getExclusivepieceCount,getExclusivepieceByNameCount,UpdateExclusivepieceById,delExclusivepieceById } from '../../../api/index';
+import {
+    DelExclusivepieceNotTody,
+    fetchData,
+    getAllRecentFilms,
+    getAllProjectionHall,
+    getExclusivepiece,
+    addExclusivePiece,
+    getExclusivepieceInfo,
+    gettExclusivepieceByName,
+    getExclusivepieceCount,
+    getExclusivepieceByNameCount,
+    UpdateExclusivepieceById,
+    delExclusivepieceById
+} from '../../../api/index';
 export default {
-    name: "scenearrange",
-    data(){
-        return{
-             query: {
-                name: null,    //搜索的电影名字
-                pageIndex: 1,  //当前页数
-                pageSize: 7   //每页显示条目个数
+    name: 'scenearrange',
+    data() {
+        return {
+            query: {
+                name: null, //搜索的电影名字
+                pageIndex: 1, //当前页数
+                pageSize: 7 //每页显示条目个数
             },
             tableData: [],
-            isSearch: false,  //是否点击搜索按钮 
+            isSearch: false, //是否点击搜索按钮
             multipleSelection: [],
-            isAdd: true,               //点击添加或编辑的标识
-            editVisible: false,        //编辑、添加弹窗
+            isAdd: true, //点击添加或编辑的标识
+            editVisible: false, //编辑、添加弹窗
             pageTotal: 0,
             form: {},
             idx: -1,
             id: -1,
-            filmsData: null,          //近期影片
+            filmsData: null, //近期影片
             projectionHallData: null, //放映厅数据
-            pickerTimeBegin: null,    //开场时间
-            pickerTimeEnd: null,      //结束时间
-            value: null,                //选择的近期影片
-            valueProjectionHall: null,  //选择的放映厅
+            pickerTimeBegin: null, //开场时间
+            pickerTimeEnd: null, //结束时间
+            value: null, //选择的近期影片
+            valueProjectionHall: null, //选择的放映厅
             mname: null,
             filmInfo: null,
-            language: ['国语','英语'],   //语言
-            effect: ['2D','3D','5D'],    //效果
-            price: null,                 //价格
-            selLanguage: null,           //选择的语言
-            seleffect: null              //选择的效果
-        }
+            language: ['国语', '英语'], //语言
+            effect: ['2D', '3D', '5D'], //效果
+            price: null, //价格
+            selLanguage: null, //选择的语言
+            seleffect: null //选择的效果
+        };
     },
-     computed:{
+    computed: {
         //监听搜索框的影片名是否发生改变
-        watchSearchName(){ return this.query.name}
-    },
-    watch:{
-        watchSearchName(_new, _old){
-            if(this.isSearch === true){
-                this.isSearch = false
-                this.getData();
-            }          
+        watchSearchName() {
+            return this.query.name;
         }
     },
-     created() {
+    watch: {
+        watchSearchName(_new, _old) {
+            if (this.isSearch === true) {
+                this.isSearch = false;
+                this.getData();
+            }
+        }
+    },
+    created() {
         this.getData();
     },
-    mounted(){
-        DelExclusivepieceNotTody().then(res => {
-          console.log("删除了"+res+"条记录")  
-        })
+    mounted() {
+        // DelExclusivepieceNotTody().then(res => {
+        //   console.log("删除了"+res+"条记录")
+        // })
     },
     methods: {
         //开场时间选定,根据选择的电影自动计算结束时间
-        handleTimeBegin(){
-            if(!this.mname){
-                this.$message.error("请选择影片");
-            }else{
-                var mdurationHours = parseInt(this.value.mduration/60);
-                var mdurationMinutes = this.value.mduration%60;
-                var time=this.pickerTimeBegin;
+        handleTimeBegin() {
+            if (!this.mname) {
+                this.$message.error('请选择影片');
+            } else {
+                var mdurationHours = parseInt(this.value.mduration / 60);
+                var mdurationMinutes = this.value.mduration % 60;
+                var time = this.pickerTimeBegin;
                 var d = new Date(time);
                 var minutesD = d.getMinutes() + mdurationMinutes;
-                if(minutesD>=60){
+                if (minutesD >= 60) {
                     mdurationHours++;
                     minutesD = minutesD - 60;
                 }
-                var times=d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + (d.getHours()+mdurationHours) + ':' + minutesD + ':' + d.getSeconds();
+                var times =
+                    d.getFullYear() +
+                    '-' +
+                    (d.getMonth() + 1) +
+                    '-' +
+                    d.getDate() +
+                    ' ' +
+                    (d.getHours() + mdurationHours) +
+                    ':' +
+                    minutesD +
+                    ':' +
+                    d.getSeconds();
                 this.pickerTimeEnd = times;
                 this.getProjectionHall(this.value.mduration);
-            }       
+            }
         },
         //获取近期影片
-        getFilms(){
+        getFilms() {
             getAllRecentFilms().then(res => {
-                if(res.code === 0){
-                    this.filmsData = res.body
-                }else{
-                    this.filmsData = res.message
+                if (res.code === 0) {
+                    this.filmsData = res.body;
+                } else {
+                    this.filmsData = res.message;
                 }
-            })
+            });
         },
         //更改选中的影片
-        changeFilm(){
-            this.mname = this.value.mname          
-            if(this.pickerTimeBegin){
+        changeFilm() {
+            this.mname = this.value.mname;
+            if (this.pickerTimeBegin) {
                 this.handleTimeBegin();
-            }         
+            }
         },
         //添加场次
-        addScene(){
+        addScene() {
             this.editVisible = true;
             this.isAdd = true;
             this.getFilms();
-            this.value=null;
+            this.value = null;
             this.mname = null;
             this.pickerTimeBegin = null;
             this.pickerTimeEnd = null;
@@ -264,52 +272,49 @@ export default {
             this.price = null;
         },
         //获取所有放映厅
-        getProjectionHall(mduration){
-            Promise.all([
-                getAllProjectionHall(),
-                getExclusivepiece()
-            ]).then(res => {
-                if(res[0].code === 0 && res[1].body && mduration && this.pickerTimeBegin){   
-                    for(let item of res[0].body){
-                        for(let item1 of res[1].body){
+        getProjectionHall(mduration) {
+            Promise.all([getAllProjectionHall(), getExclusivepiece()]).then(res => {
+                if (res[0].code === 0 && res[1].body && mduration && this.pickerTimeBegin) {
+                    for (let item of res[0].body) {
+                        for (let item1 of res[1].body) {
                             // 转换场次的起始和结束时间
                             var timeBegin = new Date(item1.timebegin);
                             var timeEnd = new Date(item1.timeend);
                             var pickerTime = new Date(this.pickerTimeBegin);
-                            var timeBeginTotal = timeBegin.getHours()*3600 + timeBegin.getMinutes()*60 + timeBegin.getSeconds();
-                            var timeEndTotal = timeEnd.getHours()*3600 + timeEnd.getMinutes()*60 + timeEnd.getSeconds();
-                            var pickerTimeTotal = pickerTime.getHours()*3600 + pickerTime.getMinutes()*60 + pickerTime.getSeconds();
-                            var pickerTimeMduration = pickerTimeTotal + mduration*60;
+                            var timeBeginTotal = timeBegin.getHours() * 3600 + timeBegin.getMinutes() * 60 + timeBegin.getSeconds();
+                            var timeEndTotal = timeEnd.getHours() * 3600 + timeEnd.getMinutes() * 60 + timeEnd.getSeconds();
+                            var pickerTimeTotal = pickerTime.getHours() * 3600 + pickerTime.getMinutes() * 60 + pickerTime.getSeconds();
+                            var pickerTimeMduration = pickerTimeTotal + mduration * 60;
                             //过滤在选择的时间中已被安排的放映厅
-                            if((pickerTimeTotal>=timeBeginTotal && pickerTimeTotal<=timeEndTotal) || (pickerTimeMduration>=timeBeginTotal && pickerTimeMduration<=timeEndTotal)){
-                                if(item.pid === item1.pid){
-                                    this.$set(item,'disabled',true)
+                            if (
+                                (pickerTimeTotal >= timeBeginTotal && pickerTimeTotal <= timeEndTotal) ||
+                                (pickerTimeMduration >= timeBeginTotal && pickerTimeMduration <= timeEndTotal)
+                            ) {
+                                if (item.pid === item1.pid) {
+                                    this.$set(item, 'disabled', true);
                                 }
                             }
                         }
-                    }             
-                    this.projectionHallData = res[0].body
-                }else if(res[0].code === 0){
-                     this.projectionHallData = res[0].body
-                }else{
-                    this.projectionHallData = res[0].message
+                    }
+                    this.projectionHallData = res[0].body;
+                } else if (res[0].code === 0) {
+                    this.projectionHallData = res[0].body;
+                } else {
+                    this.projectionHallData = res[0].message;
                 }
-            })
+            });
         },
-         // 获取数据
+        // 获取数据
         getData() {
-             let data={
-                pageIndex: this.query.pageSize*(this.query.pageIndex-1),
-                pageSize: this.query.pageSize  
-            }
-            Promise.all([
-                getExclusivepieceCount(),
-                getExclusivepieceInfo(data)
-            ]).then(res => {
-                this.pageTotal = res[0]
+            let data = {
+                pageIndex: this.query.pageSize * (this.query.pageIndex - 1),
+                pageSize: this.query.pageSize
+            };
+            Promise.all([getExclusivepieceCount(), getExclusivepieceInfo(data)]).then(res => {
+                this.pageTotal = res[0];
                 this.tableData = res[1].body;
-            })
-        },      
+            });
+        },
         // 删除操作
         handleDelete(index, row) {
             // 二次确认删除
@@ -317,45 +322,41 @@ export default {
                 type: 'warning'
             })
                 .then(() => {
-                    delExclusivepieceById({eid:row.eid}).then(res => {
-                        if(res === true){
+                    delExclusivepieceById({ eid: row.eid }).then(res => {
+                        if (res === true) {
                             this.$message.success('删除成功');
                             this.tableData.splice(index, 1);
-                        }else{
+                        } else {
                             this.$message.success('删除失败');
                         }
-                    })
-                    
+                    });
                 })
                 .catch(() => {});
         },
         // 编辑操作
         handleEdit(index, row) {
-            console.log(row)
+            console.log(row);
             this.editVisible = true;
             this.getFilms();
             this.getProjectionHall();
             this.isAdd = false;
             this.$nextTick(() => {
-                this.value = row.film,
-                this.pickerTimeBegin = row.timebegin,
-                this.pickerTimeEnd = row.timeend,
-                // this.value.mduration = row.film.mduration,
-                this.valueProjectionHall = row.pid,
-                this.selLanguage = row.mlanguage,
-                this.seleffect = row.meffect,
-                this.price = row.mprice
-
-            })  
-            this.filmInfo = row  
+                (this.value = row.film),
+                    (this.pickerTimeBegin = row.timebegin),
+                    (this.pickerTimeEnd = row.timeend),
+                    // this.value.mduration = row.film.mduration,
+                    (this.valueProjectionHall = row.pid),
+                    (this.selLanguage = row.mlanguage),
+                    (this.seleffect = row.meffect),
+                    (this.price = row.mprice);
+            });
+            this.filmInfo = row;
             this.idx = index;
-            this.value = row
-            
-            
+            this.value = row;
         },
         // 编辑确定
         saveEdit() {
-            let data={
+            let data = {
                 mid: this.value.mid,
                 pid: this.valueProjectionHall,
                 timebegin: this.pickerTimeBegin,
@@ -364,21 +365,21 @@ export default {
                 mlanguage: this.selLanguage,
                 meffect: this.seleffect,
                 mprice: this.price
-            }
+            };
             UpdateExclusivepieceById(data).then(res => {
-                if(res === true){
+                if (res === true) {
                     this.$message.success(`修改第 ${this.idx + 1} 行成功`);
                     this.getData();
-                }else{
-                    this.$message.success("修改失败请重试");
+                } else {
+                    this.$message.success('修改失败请重试');
                 }
-            })
-            this.editVisible = false;        
+            });
+            this.editVisible = false;
         },
         //添加确定
-        addEdit(){
-            console.log(this.value.mid+" "+this.valueProjectionHall+" "+this.pickerTimeBegin+" "+this.pickerTimeEnd)
-            let data={
+        addEdit() {
+            console.log(this.value.mid + ' ' + this.valueProjectionHall + ' ' + this.pickerTimeBegin + ' ' + this.pickerTimeEnd);
+            let data = {
                 mid: this.value.mid,
                 pid: this.valueProjectionHall,
                 timebegin: this.pickerTimeBegin,
@@ -386,69 +387,66 @@ export default {
                 mlanguage: this.selLanguage,
                 meffect: this.seleffect,
                 mprice: this.price
-            }
+            };
             addExclusivePiece(data).then(res => {
-                if(res === true){
+                if (res === true) {
                     this.getData();
                 }
-            })
+            });
             this.editVisible = false;
         },
         // 分页导航
         handlePageChange(val) {
             this.$set(this.query, 'pageIndex', val);
-            if(this.isSearch === true){
-                this.handleSearch()
-            }else{
+            if (this.isSearch === true) {
+                this.handleSearch();
+            } else {
                 this.getData();
-            }    
-        }, 
-        //搜索
-        handleSearch(){
-            this.isSearch = true
-            let data={
-                pageIndex: this.query.pageSize*(this.query.pageIndex-1),
-                pageSize: this.query.pageSize,
-                name: this.query.name  
             }
-            Promise.all([
-                getExclusivepieceByNameCount({name:this.query.name}),
-                gettExclusivepieceByName(data),
-            ]).then(res => {
-                this.pageTotal = res[0]
+        },
+        //搜索
+        handleSearch() {
+            this.isSearch = true;
+            let data = {
+                pageIndex: this.query.pageSize * (this.query.pageIndex - 1),
+                pageSize: this.query.pageSize,
+                name: this.query.name
+            };
+            Promise.all([getExclusivepieceByNameCount({ name: this.query.name }), gettExclusivepieceByName(data)]).then(res => {
+                this.pageTotal = res[0];
                 this.tableData = res[1].body;
-            })
+            });
         }
     }
-}
+};
 </script>
 <style scoped>
-    .handle-box {
-        margin-bottom: 20px;
-    }
-    .handle-input {
-        width: 300px;
-        display: inline-block;
-    }
-    .table {
-        width: 100%;
-        font-size: 14px;
-    }
-    .red {
-        color: #ff0000;
-    }
-    .mr10 {
-        margin-right: 10px;
-    }
-    .table-td-thumb {
-        display: block;
-        margin: auto;
-        width: 40px;
-        height: 40px;
-    }
-    .picker-time{
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-    }
+.handle-box {
+    margin-bottom: 20px;
+}
+.handle-input {
+    width: 300px;
+    display: inline-block;
+}
+.table {
+    width: 100%;
+    font-size: 14px;
+}
+.red {
+    color: #ff0000;
+}
+.mr10 {
+    margin-right: 10px;
+}
+.table-td-thumb {
+    display: block;
+    margin: auto;
+    width: 40px;
+    height: 40px;
+}
+.picker-time {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
 </style>
