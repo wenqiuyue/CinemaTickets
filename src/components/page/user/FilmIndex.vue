@@ -1,6 +1,6 @@
 <template>
     <div class="film-index">
-        <return-h title="Hello World 电影城" :left="false"></return-h>
+        <return-h title="世界电影城" :left="false"></return-h>
         <div class="body">
             <div class="block">
                 <el-carousel trigger="click" height="160px">

@@ -26,6 +26,10 @@
                 <svgIcon name="edit" size="22" class="balance" color="#FA9E3C"></svgIcon>
                 <span>安全设置</span>
             </div>
+            <div class="order" @click="loginOut">
+                <svgIcon name="setting-o" size="22" class="balance" color="#2890F0"></svgIcon>
+                <span>退出登录</span>
+            </div>
         </div>
         <userHeader></userHeader>
     </div>
@@ -83,6 +87,10 @@ export default {
         },
         setSafe() {
             this.$router.push('/setsafe');
+        },
+        loginOut() {
+            localStorage.removeItem('USER_INFO');
+            this.$router.push('/login');
         }
     }
 };

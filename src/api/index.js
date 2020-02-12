@@ -350,3 +350,26 @@ export function GetUserOrderList(data) {
         params: data
     });
 }
+//用户注册
+export function AddUser(data) {
+    return request({
+        url: '/manager/AddUser',
+        method: 'post',
+        data
+    });
+}
+//获取所有订单信息
+export function GetAllOrderInfo(data) {
+    return request({
+        url: '/manager/GetAllOrderInfo',
+        method: 'post',
+        data
+    });
+}
+//获取所有订单数量
+export function GetAllOrderCount() {
+    return request({
+        url: '/manager/GetAllOrderCount',
+        method: 'get'
+    });
+}

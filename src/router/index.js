@@ -122,6 +122,11 @@ export default new Router({
                     path: '/scenearrange',
                     component: () => import('../components/page/projectionhall/SceneArrange.vue'),
                     meta: { title: '场次安排' }
+                },
+                {
+                    path: '/ordermanager',
+                    component: () => import('../components/page/ordermanager/OrderManager.vue'),
+                    meta: { title: '订单管理' }
                 }
             ]
         },
