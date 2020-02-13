@@ -62,7 +62,7 @@
                 </div>
             </div>
         </div>
-        <div v-if="!exclusivepieceData" class="noexclusivepiece">暂无排片信息</div>
+        <div v-if="exclusivepieceData.length ===0" class="noexclusivepiece">暂无排片信息</div>
     </div>
 </template>
 <script>
@@ -83,7 +83,7 @@ export default {
         return {
             text: '新视界，新天地，心享受! 高保真优质视听效果，给你身临其境的感觉。',
             film: null, //选择的电影数据
-            exclusivepieceData: null, //排片数据
+            exclusivepieceData: [], //排片数据
             mid: this.$route.query.filmId, // 选择的影片id
             userinfo: null
         };
@@ -117,12 +117,7 @@ export default {
         getExclusivepieceData() {
             GetExclusivePieceById({ mid: this.mid }).then(res => {
                 if (res.code === 0) {
-                    this.exclusivepieceData = res.body;
-                    if (res.body.length > 0) {
-                        this.exclusivepieceData = res.body;
-                    } else {
-                        this.exclusivepieceData = null;
-                    }
+                    this.exclusivepieceData = res.body.filter(m => new Date(m.timebegin).valueOf() > new Date().valueOf());
                 } else {
                     return;
                 }

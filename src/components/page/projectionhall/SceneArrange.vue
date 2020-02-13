@@ -275,6 +275,9 @@ export default {
         getProjectionHall(mduration) {
             Promise.all([getAllProjectionHall(), getExclusivepiece()]).then(res => {
                 if (res[0].code === 0 && res[1].body && mduration && this.pickerTimeBegin) {
+                    // const exclusivepiece = res[1].body.filter(
+                    //     m => new Date(m.timebegin).setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0)
+                    // );
                     for (let item of res[0].body) {
                         for (let item1 of res[1].body) {
                             // 转换场次的起始和结束时间
@@ -378,7 +381,6 @@ export default {
         },
         //添加确定
         addEdit() {
-            console.log(this.value.mid + ' ' + this.valueProjectionHall + ' ' + this.pickerTimeBegin + ' ' + this.pickerTimeEnd);
             let data = {
                 mid: this.value.mid,
                 pid: this.valueProjectionHall,

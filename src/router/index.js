@@ -8,7 +8,7 @@ export default new Router({
     routes: [
         {
             path: '/',
-            redirect: '/filmIndex'
+            redirect: '/login'
         },
         {
             path: '/',

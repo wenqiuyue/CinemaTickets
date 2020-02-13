@@ -51,9 +51,14 @@ export default {
         };
     },
     created() {
-        let userLocal = localStorage.getItem('USER_INFO');
-        if (userLocal) {
-            this.$router.push({ path: '/' });
+        let userinfo = localStorage.getItem('USER_INFO');
+        if (userinfo) {
+            userinfo = JSON.parse(userinfo);
+            if (userinfo.utype === 0) {
+                this.$router.push({ path: '/ordermanager' });
+            } else {
+                this.$router.push({ path: '/filmIndex' });
+            }
         }
     },
     methods: {
@@ -78,7 +83,7 @@ export default {
                                 //如果当用户类型为0时，走后台管理员界面，等于1时，走会员界面
                                 if (res.body.utype === 0) {
                                     this.$message.success('登录成功');
-                                    this.$router.push({ path: '/dashboard' });
+                                    this.$router.push({ path: '/ordermanager' });
                                 } else if (res.body.utype === 1) {
                                     this.$router.push({ path: '/filmIndex' });
                                 }

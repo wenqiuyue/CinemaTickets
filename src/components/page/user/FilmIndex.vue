@@ -106,7 +106,6 @@ export default {
                 if (res.code === 0) {
                     this.recentFilmsList = res.body;
                     // this.getFilmScore();
-                    console.log(this.recentFilmsList);
                 }
             });
         },
