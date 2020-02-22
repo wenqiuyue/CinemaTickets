@@ -50,7 +50,8 @@ export default {
     data() {
         return {
             circleUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-            userInfo: null //用户信息
+            userInfo: null, //用户信息
+            uid: null
         };
     },
     created() {
@@ -64,6 +65,7 @@ export default {
             let userinfo = localStorage.getItem('USER_INFO');
             if (userinfo) {
                 userinfo = JSON.parse(userinfo);
+                this.uid = userinfo.uid;
             }
             api.GetNameAndPicById({ uid: userinfo.uid }).then(res => {
                 if (res.code === 0) {
@@ -77,7 +79,7 @@ export default {
          * 进入修改信息
          */
         setInfo() {
-            this.$router.push({ path: '/setinfo', query: { uid: 1 } });
+            this.$router.push({ path: '/setinfo', query: { uid: this.uid } });
         },
         myOrder() {
             this.$router.push('/myorder');
