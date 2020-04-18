@@ -105,7 +105,7 @@ export default {
             AddFilmReview(data).then(res => {
                 if (res) {
                     Toast.success('发布成功');
-                    this.getFilmScore();
+                    this.$router.back();
                 } else {
                     Toast.success('发布失败');
                 }

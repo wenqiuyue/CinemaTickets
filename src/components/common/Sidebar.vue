@@ -57,11 +57,6 @@ export default {
             collapse: false,
             items: [
                 {
-                    icon: 'el-icon-pie-chart',
-                    index: 'ordermanager',
-                    title: '订单管理'
-                },
-                {
                     icon: 'el-icon-lx-cascades',
                     index: '1',
                     title: '影片管理',
@@ -90,6 +85,11 @@ export default {
                             title: '场次安排'
                         }
                     ]
+                },
+                {
+                    icon: 'el-icon-pie-chart',
+                    index: 'ordermanager',
+                    title: '订单管理'
                 }
             ]
         };

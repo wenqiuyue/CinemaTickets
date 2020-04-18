@@ -82,6 +82,7 @@ export default {
             }
             api.GetUserOrderList({ uid: userinfo.uid }).then(res => {
                 if (res.code === 0) {
+                    //根据开场时间给订单列表中的订单增加订单状态字段
                     res.body.forEach(element => {
                         if (new Date(element.exclusivePiece.timebegin).valueOf() > new Date().valueOf()) {
                             element.state = '待使用';

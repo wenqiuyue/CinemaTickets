@@ -95,6 +95,7 @@ export default {
         //     console.log('删除了' + res + '条记录');
         // });
     },
+
     methods: {
         //导航条
         handleSelect(key, keyPath) {
